@@ -1,0 +1,27 @@
+{
+    "apps" : [{
+       "name"   : "PESANTRENQU - uSERVICE - FINANCE API",
+       "script"  : "/srv/madrasahqu/http/reports/bin/www",
+       "instances" : "max",
+       "exec_mode" : "cluster",
+       "watch"   : true,
+       "env": {
+           "ENV": "production",
+           "APP":"pesantrenqu-finance-api",
+           "APP_VERSION":"1",
+           "APP_SEMANTIC":"0.1.0",
+           "PORT":"6020",
+           "DB_TYPE":"sql",
+           "DB_DIALECT":"mysql"
+       },
+       "env_production" : {
+           "ENV": "production",
+           "APP":"pesantrenqu-finance-api",
+           "APP_VERSION":"1",
+           "APP_SEMANTIC":"0.1.0",
+           "PORT":"6020",
+           "DB_TYPE":"sql",
+           "DB_DIALECT":"mysql"
+       }
+    }]
+}
