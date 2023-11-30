@@ -8,6 +8,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
+    merchant_id: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
     category_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -15,6 +19,10 @@ module.exports = function(sequelize, DataTypes) {
         model: 'product_categories',
         key: 'id'
       }
+    },
+    category_name: {
+      type: DataTypes.STRING(100),
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING(100),

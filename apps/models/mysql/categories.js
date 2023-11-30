@@ -1,12 +1,16 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('product_categories', {
+  return sequelize.define('categories', {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
+    },
+    merchant_id: {
+      type: DataTypes.STRING(100),
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING(14),
@@ -34,17 +38,7 @@ module.exports = function(sequelize, DataTypes) {
     }
   }, {
     sequelize,
-    tableName: 'product_categories',
+    tableName: 'categories',
     timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-    ]
   });
 };

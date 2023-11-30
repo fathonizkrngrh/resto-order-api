@@ -6,7 +6,7 @@ module.exports = {
         "username": process.env.DB_USERNAME || 'root',
         "password": process.env.DB_PASSWORD || '',
         "host": process.env.DB_HOST || '127.0.0.1',
-        "database": process.env.DB_NAME || "resto-order",
+        "database": process.env.DB_RESTOORDER_NAME || "resto-order",
         "port": 3306,
         "ssl": false,
         "dialect": "mysql",

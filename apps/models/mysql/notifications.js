@@ -8,6 +8,10 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
+    merchant_id: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
     trx_code: {
       type: DataTypes.STRING(100),
       allowNull: true

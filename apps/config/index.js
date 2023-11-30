@@ -17,6 +17,6 @@ CONFIG.db_name      = process.env.DB_NAME       || 'resto-order' //admin
 CONFIG.jwt_encryption  = process.env.JWT_ENCRYPTION || 'R4h451a13An9Et'
 CONFIG.jwt_expiration  = process.env.JWT_EXPIRATION || '10000'
 
-CONFIG.secret_key_encrypt = process.env.SECRET_KEY_ENCRYPTION || 'R4h451a13An9EtLH0'
+CONFIG.password_key_encrypt = process.env.SECRET_KEY_ENCRYPTION || 'R4h451a13An9EtLH0'
 
 module.exports = CONFIG

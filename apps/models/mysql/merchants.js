@@ -12,17 +12,21 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(14),
       allowNull: false
     },
+    package_name: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
     location: {
       type: DataTypes.STRING(100),
       allowNull: false
     },
     facebook: {
       type: DataTypes.STRING(100),
-      allowNull: false
+      allowNull: true
     },
     instagram: {
       type: DataTypes.STRING(100),
-      allowNull: false
+      allowNull: true
     },
     logo: {
       type: DataTypes.TEXT,
