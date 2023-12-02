@@ -1,0 +1,89 @@
+<div id="show-order" class="tab-pane fade show active" role="tabpanel">
+  <!-- Table -->
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table
+          class="table table-bordered table-sm"
+          id="dataTable"
+          width="100%"
+          cellspacing="0"
+        >
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Invoice</th>
+              <th>Total</th>
+              <th style="width: 50px">Table Number</th>
+              <th>Order Details</th>
+              <th>Buyer</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable">
+            <% for(let i = 0; i < order.length; i++){ %>
+            <tr>
+              <td><%- i+1 %></td>
+              <td><%- order[i].invoice %></td>
+              <td>Rp. <%- order[i].total %></td>
+              <td><%- order[i].tableNumber %></td>
+              <td>
+                <table class="table mb-0 p-0">
+                  <% for(let j = 0; j < order[i].cartId.length; j++){ %>
+
+                  <tr>
+                    <td style="width: 30px"><%- order[i].cartId[j].qty %>x</td>
+                    <td><%- order[i].cartId[j].productId.name %></td>
+                    <td style="width: 150px">
+                      <%- order[i].cartId[j].notes %>
+                    </td>
+                  </tr>
+
+                  <% }%>
+                </table>
+              </td>
+
+              <td><%- order[i].username %></td>
+              <% if(order[i].isPaid === false){ %>
+              <td>
+                <b class="text-danger"> Unpaid </b>
+              </td>
+              <% } else if(order[i].isPaid === true){ %>
+              <td>
+                <b class="text-success">Paid</b>
+              </td>
+              <% } %>
+
+              <td>
+                <form
+                  action="/admin/order/<%= order[i].id %>?_method=PUT" method="POST"
+                >
+                  <a
+                    href="javascript:void()"
+                    type="button"
+                    class="btn btn-warning btn-circle btn-sm button-detail"
+                    data-id="<%= order[i].id %>"
+                    data-name="<%= order[i].invoice %>"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <% if(order[i].isPaid === false){ %>
+                  <button
+                    class="btn btn-circle btn-sm btn-success"
+                    type="submit"
+                  >
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <% } %>
+                </form>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- AkhirTable -->
+</div>

@@ -1,0 +1,180 @@
+<%- include('../../partials/header.ejs') %>
+<!-- Page Wrapper -->
+<div id="wrapper">
+  <!-- Sidebar -->
+
+  <%- include('../../partials/sidebar.ejs') %>
+  <!-- End of Sidebar -->
+
+  <!-- Content Wrapper -->
+  <div id="content-wrapper" class="d-flex flex-column">
+    <!-- Main Content -->
+    <div id="content">
+      <!-- Topbar -->
+
+      <%- include('../../partials/navbar.ejs') %>
+      <!-- End of Topbar -->
+
+      <!-- Begin Page Content -->
+      <div class="container-fluid">
+        <%- include('../../partials/message.ejs') %>
+        <!-- Page Heading -->
+        <h1 class="h3 mb-4 text-gray-800">Orderer</h1>
+        <!-- Akhir Heading -->
+        <% if(action == 'view'){%>
+        <!-- nav tabs -->
+        <ul class="nav nav-tabs">
+          <li class="nav-item active">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              id="show-order-tab"
+              href="#show-order"
+              role="tab"
+              >Show order</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content"><%- include('tableOrder.ejs') %></div>
+
+        <% } else if(action == 'show product') { %>
+
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              data-toggle="tab"
+              id="show-product-tab"
+              href="#show-product"
+              role="tab"
+              >Show Product</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content"></div>
+
+        <% } %>
+      </div>
+      <!-- /.container-fluid -->
+    </div>
+    <!-- End of Main Content -->
+
+    <!-- Footer -->
+
+    <%- include('../../partials/footer.ejs') %>
+    <!-- End of Footer -->
+  </div>
+  <!-- End of Content Wrapper -->
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+  <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Logout Modal-->
+<div
+  class="modal fade"
+  id="logoutModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+        <button
+          class="close"
+          type="button"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Select "Logout" below if you are ready to end your current session.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-dismiss="modal">
+          Cancel
+        </button>
+        <a class="btn btn-primary" href="login.html">Logout</a>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../../partials/js.ejs')%>
+
+<!-- socket -->
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+
+<!-- Socket.io Script -->
+<script>
+  const socket = io();
+
+  socket.on('newOrder', (order) => {
+    // Handle the new order
+    console.log('New order received:', order);
+
+    // Update the table
+    updateTable(order);
+
+    // Show alert
+    showAlert('success', 'New order received');
+  });
+
+  function updateTable(order) {
+
+    // Example: Append a new row to the table
+    const newRow = `
+    <tr>
+      <td>${order._id+ 1}</td>
+      <td>${order.invoice}</td>
+      <td>Rp. ${order.total}</td>
+      <td>${order.tableNumber}</td>
+      <td>
+        <table class="table mb-0 p-0">
+          ${order.cartId.map(cartItem => `
+            <tr>
+              <td style="width: 30px">${cartItem.qty}x</td>
+              <td>${cartItem.productId.name}</td>
+              <td style="width: 150px">${cartItem.notes}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </td>
+      <td>${order.username}</td>
+      <td>
+        ${order.isPaid
+          ? '<b class="text-success">Paid</b>'
+          : '<b class="text-danger">Unpaid</b>'}
+      </td>
+      <td>
+        <form action="/admin/order/${order._id}?_method=PUT" method="POST">
+          <a href="javascript:void()" type="button" class="btn btn-warning btn-circle btn-sm button-detail"
+            data-id="${order._id}" data-name="${order.invoice}">
+            <i class="fas fa-edit"></i>
+          </a>
+          ${!order.isPaid
+            ? '<button class="btn btn-circle btn-sm btn-success" type="submit"><i class="fas fa-check"></i></button>'
+            : ''}
+        </form>
+      </td>
+    </tr>`;
+
+    document.getElementById('dataTable').innerHTML += newRow;
+  }
+
+  function showAlert(status, message) {
+    const alertDiv = document.getElementById('alertDiv');
+    alertDiv.innerHTML = `
+      <div class="alert alert-${status}" role="alert">
+        ${message}
+      </div>
+    `;
+  }
+</script>

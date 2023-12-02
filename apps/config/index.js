@@ -13,6 +13,9 @@ CONFIG.db_dialect   = process.env.DB_DIALECT    || 'mysql' //mongodb
 CONFIG.db_server    = process.env.DB_SERVER     || '127.0.0.1' //clusterexperiment-bqz4k.mongodb.net
 CONFIG.db_port      = process.env.DB_PORT       || '3306' //27017
 CONFIG.db_name      = process.env.DB_NAME       || 'resto-order' //admin
+CONFIG.cloudinary_api_key      = process.env.CLOUDINARY_API_KEY       || '825989214586882'
+CONFIG.cloudinary_api_secret      = process.env.CLOUDINARY_API_SECRET       || 'bPnfrGjkayfgnrAIDUmGqbcThHs'
+CONFIG.cloudinary_cloud_name      = process.env.CLOUDINARY_CLOUD_NAME       || 'dlwncfs2u'
 
 CONFIG.jwt_encryption  = process.env.JWT_ENCRYPTION || 'R4h451a13An9Et'
 CONFIG.jwt_expiration  = process.env.JWT_EXPIRATION || '10000'

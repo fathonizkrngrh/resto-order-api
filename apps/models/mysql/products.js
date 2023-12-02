@@ -34,7 +34,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     image: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: true
     },
     price: {
       type: DataTypes.DECIMAL(10,2),
@@ -100,22 +100,5 @@ module.exports = function(sequelize, DataTypes) {
     sequelize,
     tableName: 'products',
     timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-      {
-        name: "products_FK",
-        using: "BTREE",
-        fields: [
-          { name: "category_id" },
-        ]
-      },
-    ]
   });
 };

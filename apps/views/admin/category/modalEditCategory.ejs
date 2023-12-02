@@ -1,0 +1,49 @@
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="edit-category-modal"
+  tabindex="-1"
+  aria-labelledby="editModalCategory"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editCategoryModalTitle">
+          Edit category
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form action="/admin/category?_method=PUT" method="POST">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              class="form-control name"
+              placeholder="Enter category name"
+              name="name"
+              required
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <input type="text" class="id" hidden name="id" />
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="submit" class="btn btn-primary">Edit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

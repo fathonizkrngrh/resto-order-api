@@ -1,10 +1,10 @@
 "use strict";
 const Op = require('sequelize').Op
-const Pagination = require("../utilities/pagination");
-const RESPONSE = require("../utilities/response");
-const UTILITIES = require("../utilities");
-const CONFIG = require('../config')
-const model = require("../models/mysql")
+const Pagination = require("../../utilities/pagination");
+const RESPONSE = require("../../utilities/response");
+const UTILITIES = require("../../utilities");
+const CONFIG = require('../../config')
+const model = require("../../models/mysql")
 const tUser = model.users
 
 module.exports.signin = async (req, res) => {
@@ -27,7 +27,7 @@ module.exports.signin = async (req, res) => {
         })
         if (!user) {
             const response = RESPONSE.error('unknown')
-            response.error_message = 'Pengguna tidak ditemukan'
+            response.error_message = 'Pengguna not found'
             return res.status(400).json(response)
         }
 
@@ -69,6 +69,12 @@ module.exports.register = async (req, res) => {
                 response.error_message = `${requiredAttributes[key]} wajib diisi.`
                 return res.status(400).json(response)
             }
+        }
+
+        if (confirm_password !== confirm_password) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Password tidak sama.`
+            return res.status(400).json(response)
         }
 
         const checkEmail = await tUser.findOne({

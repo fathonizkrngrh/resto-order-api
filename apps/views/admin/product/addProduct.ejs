@@ -1,0 +1,124 @@
+<div id="add-product" class="tab-pane fade">
+  <div class="card shadow mb-4 mt-t">
+    <div class="card-header py-3">
+      <h4>Add Product</h4>
+    </div>
+    <div class="card-body">
+      <form action="/admin/product" method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="form-group col-md-6">
+            <label for="name">Category</label>
+            <select class="form-select" name="category_id">
+              <option selected>--- Category ---</option>
+              <% for (let i = 0; i< category.length; i++) { %>
+              <option value="<%= category[i].id %>">
+                <%= category[i].name %>
+              </option>
+              <% } %>
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              placeholder="Enter name"
+              name="name"
+              required
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="Price">Price</label>
+            <input
+              type="number"
+              class="form-control"
+              id="price"
+              placeholder="Enter price"
+              name="price"
+              required
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="image">Image</label>
+            <input
+              type="file"
+              class="form-control"
+              id="image"
+              name="image"
+              single
+              required
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="name">Type</label>
+            <select class="form-select" name="type" id="typeSelect">
+              <option selected disabled>--- Type ---</option>
+              <option value="stock">Stock</option>
+              <option value="cook">Cook</option>
+            </select>
+          </div>
+          <div class="form-group col-md-6" id="stockInput" style="display: none;">
+            <label for="Stock">Stock</label>
+            <input
+              type="number"
+              class="form-control"
+              id="stock"
+              placeholder="Enter stock"
+              name="stock"
+            />
+          </div>
+          <div class="form-group col-md-6" id="cookInputs" style="display: none;">
+            <label for="isReady">Ready</label>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="ready"
+                id="isReadyTrue"
+                value=1
+              />
+              <label class="form-check-label" for="isReadyTrue">
+                Yes
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="isReady"
+                id="isReadyFalse"
+                value=0
+              />
+              <label class="form-check-label" for="isReadyFalse">
+                No
+              </label>
+            </div>
+          </div>
+          
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const typeSelect = document.getElementById('typeSelect');
+  const stockInput = document.getElementById('stockInput');
+  const cookInputs = document.getElementById('cookInputs');
+
+  typeSelect.addEventListener('change', function () {
+    if (this.value === 'stock') {
+      stockInput.style.display = 'block';
+      cookInputs.style.display = 'none';
+    } else if (this.value === 'cook') {
+      cookInputs.style.display = 'block';
+      stockInput.style.display = 'none';
+    } else {
+      stockInput.style.display = 'none';
+      cookInputs.style.display = 'none';
+    }
+  });
+</script>

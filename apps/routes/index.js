@@ -1,14 +1,22 @@
 "use strict";
 
 const express = require("express");
+//  Middleware
+const middleware = require("../middlewares")
+const multer = require("../middlewares/multer")
 //CONTROLLERS
-const controller = require("../controllers");
-const cAuthAdmin = require("../controllers/auth");
-const cAuthUser = require("../controllers/user_auth");
-const cCategory = require("../controllers/categories");
-const cProduct = require("../controllers/products");
-const cMerchant = require("../controllers/merchants");
-const cCart = require("../controllers/carts");
+const controller = require("../controllers/apis");
+const cAuthAdmin = require("../controllers/apis/auth");
+const cAuthUser = require("../controllers/apis/user_auth");
+const cCategory = require("../controllers/apis/categories");
+const cProduct = require("../controllers/apis/products");
+const cMerchant = require("../controllers/apis/merchants");
+const cCart = require("../controllers/apis/carts");
+// ADMIN CONTROLLERS
+const cDashboard = require("../controllers/admins/dashboard");
+const cAdminCategory = require("../controllers/admins/categories");
+const cAdminProduct = require("../controllers/admins/products");
+const cAuth = require("../controllers/admins/auth");
 
 //ROUTINGS
 module.exports = (app) => {
@@ -16,8 +24,26 @@ module.exports = (app) => {
 
   const adminAuthRouter = express.Router()
   app.use('/admin', adminAuthRouter)
-  adminAuthRouter.post("/signin", (req, res) => cAuthAdmin.signin(req, res));
+  adminAuthRouter.get("/signin", (req, res) => cAuth.signinPage(req, res));
+  adminAuthRouter.post("/signin", (req, res) => cAuth.signin(req, res));
   adminAuthRouter.post("/register", (req, res) => cAuthAdmin.register(req, res));
+
+  const adminRouter = express.Router()
+  app.use('/admin', middleware.checkAdmin, adminRouter)
+  adminRouter.get("/", (req, res) => cDashboard.viewDashboard(req, res));
+  // category
+  adminRouter.get("/category", (req, res) => cAdminCategory.viewCategory(req, res));
+  adminRouter.post("/category", (req, res) => cAdminCategory.addCategory(req, res));
+  adminRouter.put("/category", (req, res) => cAdminCategory.editCategory(req, res));
+  adminRouter.delete("/category/:id", (req, res) => cAdminCategory.deleteCategory(req, res));
+  // product
+  adminRouter.get("/product", (req, res) => cAdminProduct.viewProduct(req, res));
+  adminRouter.get("/product/show-image/:id", (req, res) => cAdminProduct.showImageProduct(req, res));
+  adminRouter.get("/product/:id", (req, res) => cAdminProduct.showEditProduct(req, res));
+  adminRouter.post("/product", multer.upload ,(req, res) => cAdminProduct.addProduct(req, res));
+  adminRouter.post("/product/edit", multer.upload ,(req, res) => cAdminProduct.editProduct(req, res));
+  adminRouter.delete("/product/:id", (req, res) => cAdminProduct.deleteproduct(req, res));
+  
 
   const clientAuthRouter = express.Router()
   app.use('/user', clientAuthRouter)

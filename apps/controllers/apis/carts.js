@@ -1,17 +1,22 @@
 "use strict";
 const Op = require('sequelize').Op
-const pagination = require("../utilities/pagination");
-const RESPONSE = require("../utilities/response");
-const UTILITIES = require("../utilities");
-const CONFIG = require('../config')
-const model = require("../models/mysql")
+const pagination = require("../../utilities/pagination");
+const RESPONSE = require("../../utilities/response");
+const UTILITIES = require("../../utilities");
+const CONFIG = require('../../config')
+const model = require("../../models/mysql")
 const tCart = model.carts
 const tProduct = model.products
-const tTransaction = model.transactions
-const tTransactionDetail = model.transaction_details
 const catchMessage = `Mohon maaf telah terjadi gangguan, jangan panik kami akan terus meningkatkan layanan.`
 
 
+/**
+ * Function List of Cart's
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
 module.exports.list = async (req, res) => {
     const page              = req.query.page || 0
     const size              = req.query.size || 10
@@ -20,16 +25,17 @@ module.exports.list = async (req, res) => {
     let { order_by, order_type } = req.query
 
     try {
-        const list = await tTransaction.findAndCountAll({
+        const list = await tCart.findAndCountAll({
             attributes: { exclude: ['modified_on', 'deleted'] },
             raw: true,
             where: {
                 deleted: { [Op.eq]: 0 },
                 merchant_id: { [Op.eq]: req.header("X-merchant-ID") },
                 user_id: { [Op.eq]: req.header("X-USER-ID") },
+                status: { [Op.eq]: 'waiting' },
             },
             include: [{
-                model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: ['created_on', 'modified_on', 'deleted']}
+                model: tProduct, required: true, as: 'product', attributes: {exclude: ['created_on', 'modified_on', 'deleted']}
             }],
             ...req.query.pagination == 'true' && {
                 offset      : offset,
@@ -50,10 +56,17 @@ module.exports.list = async (req, res) => {
     }
 }
 
-module.exports.checkout = async (req, res) => {
+/**
+ * Function Create Cart's
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+module.exports.add_to_cart = async (req, res) => {
     const body = req.body
 
-    if (!body.table_number) {
+    if (!body.product_id || !body.qty || !body.notes) {
         const response = RESPONSE.error('unknown')
         response.error_message = `Permintaan tidak lengkap.`
         return res.status(400).json(response)
@@ -66,7 +79,7 @@ module.exports.checkout = async (req, res) => {
     })
     if (!product) {
         const response = RESPONSE.error('unknown')
-        response.error_message = `Produk tidak ditemukan.`
+        response.error_message = `Produk not found.`
         return res.status(400).json(response)
     }
     if (product.stock == 0 && product.ready == 0) {
@@ -95,6 +108,38 @@ module.exports.checkout = async (req, res) => {
 
         const response = RESPONSE.default
         response.data  = created
+        return res.status(200).json(response)   
+    } catch (err) {
+        console.log(err)
+        const response = RESPONSE.error('unknown')
+        response.error_message = err.message || catchMessage
+        return res.status(500).json(response)
+    }
+}
+
+/**
+ * Function Delete Cart's
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+module.exports.delete = async (req, res) => {
+    const body = req.body
+
+    if (!body.cart_id ) {
+        const response = RESPONSE.error('unknown')
+        response.error_message = `Permintaan tidak lengkap.`
+        return res.status(400).json(response)
+    }
+
+    try {
+        const deleted = await tCart.update({ deleted: 1}, { 
+            where: { id: { [Op.eq]: body.cart_id }, deleted: { [Op.eq]: 0 } }
+        })
+
+        const response = RESPONSE.default
+        response.data  = deleted
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)

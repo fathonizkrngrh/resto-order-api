@@ -1,10 +1,10 @@
 "use strict";
 const Op = require('sequelize').Op
-const pagination = require("../utilities/pagination");
-const RESPONSE = require("../utilities/response");
-const UTILITIES = require("../utilities");
-const CONFIG = require('../config')
-const model = require("../models/mysql")
+const pagination = require("../../utilities/pagination");
+const RESPONSE = require("../../utilities/response");
+const UTILITIES = require("../../utilities");
+const CONFIG = require('../../config')
+const model = require("../../models/mysql")
 const tCategory =model.categories
 const tProduct =model.products
 const catchMessage = `Mohon maaf telah terjadi gangguan, jangan panik kami akan terus meningkatkan layanan.`
@@ -174,7 +174,7 @@ module.exports.update = async (req, res) => {
         })
         if (!category) {
             const response = RESPONSE.error('unknown')
-            response.error_message = `Kategori tidak ditemukan.`
+            response.error_message = `Category not found.`
             return res.status(400).json(response)
         }    
 

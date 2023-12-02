@@ -14,9 +14,13 @@ module.exports = function(sequelize, DataTypes) {
     },
     phone: {
       type: DataTypes.STRING(14),
-      allowNull: false
+      allowNull: true
     },
     username: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    email: {
       type: DataTypes.STRING(50),
       allowNull: false
     },
