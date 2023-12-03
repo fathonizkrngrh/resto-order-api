@@ -1,5 +1,5 @@
 /* jshint indent: 2 */
-
+"use strict";
 const { Op } = require("sequelize");
 const model = require("../../models/mysql")
 const seq = model.sequelize
@@ -7,7 +7,7 @@ const tCategory = model.categories
 const tProduct = model.products
 const tMerchant = model.merchants
 const cloudinary = require("../../config/cloudinary");
-const { upload } = require("../../utilities/cloudinary");
+const { upload, destroy } = require("../../utilities/cloudinary");
 
 module.exports = {
   viewProduct: async (req, res) => {
@@ -70,7 +70,7 @@ module.exports = {
     
     const countProduct = await tProduct.count({ raw: true, where: {merchant_id: { [Op.eq]: user.merchant_id}, category_id: {[Op.eq]: body.category_id }}})
     const prefix = category.name.match(/[bcdfghjklmnpqrstvwxyz]/gi).join('').toUpperCase();
-    const code = prefix.toUpperCase() + ` ${countProduct+1}`.padStart(3, '0')
+    const code = prefix.toUpperCase() + `${countProduct+1}`.padStart(3, '0')
 
     try {
       const product = await tProduct.create({
@@ -86,10 +86,14 @@ module.exports = {
           point: body.point || 0,
       })
 
-      upload(req.file.path, `${user.merchant_id.replace(/\./g, '_')}/images/products`).then(async (result)=> {
-        console.log(result)
-        await tProduct.update({ image: result.secure_url}, {where: {id: {[Op.eq]: product.id }}})
-      })
+      await upload(req.file.path, `${user.merchant_id.replace(/\./g, '_')}/images/products`).then(async (image) => {
+          await tProduct.update({ image: image.secure_url}, {where: {id: {[Op.eq]: product.id }}})
+        })
+        .catch((error) => {
+          req.flash("alertMessage", `${error}`);
+          req.flash("alertStatus", "danger");
+          return res.redirect("/admin/product");
+      });
 
       req.flash("alertMessage", "success add product");
       req.flash("alertStatus", "success");
@@ -215,14 +219,24 @@ module.exports = {
           deleted: { [Op.eq]: 0 } }
       })
       if (!product) {
-          req.flash("alertMessage", `Product not found`);
-          req.flash("alertStatus", "danger");
-          return res.redirect("/admin/product");
+          req.flash("alertMessage", `Product not found`)
+          req.flash("alertStatus", "danger")
+          return res.redirect("/admin/product")
       }
 
       if (body.type === "cook") body.stock = 0 
         
       await tProduct.update({...body}, { where: { merchant_id: { [Op.eq]: user.merchant_id }, id: { [Op.eq]: body.id }, deleted: { [Op.eq]: 0 } }});
+
+      if (req.file) {
+        await destroy(product.image).then(async () => {
+          await upload(req.file.path, `${user.merchant_id.replace(/\./g, '_')}/images/products`).then(async (result)=> {
+            console.log(result)
+            await tProduct.update({ image: result.secure_url}, {where: {id: {[Op.eq]: body.id }}})
+          })
+        })
+
+      }
 
       req.flash("alertMessage", "success update product");
       req.flash("alertStatus", "success");

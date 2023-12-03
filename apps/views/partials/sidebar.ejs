@@ -29,18 +29,23 @@
   <% if (user.role === 'superadmin') { %>
     <!-- Divider -->
     <hr class="sidebar-divider" />
+    <!-- Heading -->
+    <div class="sidebar-heading">Merchants</div>
       <li class="nav-item">
         <a class="nav-link" href="/admin/merchant">
           <i class="fas fa-fw fa-list-alt"></i>
           <span>Merchant</span></a
         >
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/admin/account">
+          <i class="fas fa-fw fa-list-alt"></i>
+          <span>Account</span></a
+        >
+      </li>
   <% } %>
-
-
   <!-- Divider -->
   <hr class="sidebar-divider" />
-
   <!-- Heading -->
   <div class="sidebar-heading">Foods</div>
 

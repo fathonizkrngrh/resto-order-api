@@ -49,6 +49,11 @@ module.exports.checkHeader = async (req, res, next) => {
         response.error_message = `Tidak diperkenankan melakukan akses. Toko Anda tidak dikenali.`
         return res.status(400).json(response)
     }
+    if(merchant.active === 0){
+        const response = RESPONSE.error("forbidden")
+        response.error_message = `Toko ini sedang tidak aktif.`
+        return res.status(400).json(response)
+    }
     req.app.locals.merchant = merchant
     next()
 }
@@ -56,7 +61,6 @@ module.exports.checkHeader = async (req, res, next) => {
 module.exports.checkAdmin = async (req, res, next) => { 
     let account  = null, merchant = null
     const session = req.session.user
-    console.log(session)
     if(!session){
         req.flash("alertMessage", "Sesi anda habis. Silahkan Login Kembali");
         req.flash("alertStatus", "danger");
@@ -64,13 +68,7 @@ module.exports.checkAdmin = async (req, res, next) => {
     }
 
     try{
-        account = await tAccount.findOne({
-            raw: true, where: {
-                id: {[Op.eq]: session.id},  
-                merchant_id: {[Op.eq]: session.merchant_id},  
-                deleted: {[Op.eq]: 0}
-            }
-        })
+        account = await tAccount.findOne({ raw: true, where: { id: {[Op.eq]: session.id}, deleted: {[Op.eq]: 0}}})
         if(!account){
             req.flash("alertMessage", "Anda tidak terdaftar pada aplikasi ini");
             req.flash("alertStatus", "danger");
@@ -84,7 +82,7 @@ module.exports.checkAdmin = async (req, res, next) => {
             attributes: ['id', 'package_name', 'name']
         })
         if(!account){
-            req.flash("alertMessage", "Anda tidak terdaftar pada aplikasi ini");
+            req.flash("alertMessage", "Merchant anda tidak terdaftar pada aplikasi ini");
             req.flash("alertStatus", "danger");
             return res.redirect("/admin/signin");
         }

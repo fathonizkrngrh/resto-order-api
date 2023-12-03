@@ -15,7 +15,7 @@ module.exports.register_admin_merchant = async (req, res) => {
     } = req.body
 
     try {
-        const requiredAttributes = { username: "username", role: "Role", email: 'Email', phone: 'Nomor Telepon', password: 'Password' }
+        const requiredAttributes = { username: "Username", name: "Name", role: "Role", email: 'Email', phone: 'Phone', password: 'Password' }
         for (const key of Object.keys(requiredAttributes)) {
             if (!req.body[key]) {
                 const response = RESPONSE.error('unknown')

@@ -23,10 +23,16 @@
         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="merchantDropdown">
           <!-- Assume merchantList is an array of merchant names -->
           <% merchants.forEach(merchant => { %>
-            <a class="dropdown-item" href="/admin/merchant/<%= merchant.id %>">
-              <%= merchant.name %>
-            </a>
-            <% }) %>
+            <% if (user.merchant_id === merchant.package_name) { %>
+              <a class="dropdown-item disabled" href="/admin/change_merchant/<%= merchant.package_name %>"  >
+                <%= merchant.name %>
+              </a>
+            <% } else { %>
+              <a class="dropdown-item" href="/admin/change_merchant/<%= merchant.package_name %>">
+                <%= merchant.name %>
+              </a>
+            <% }  %>
+          <% }) %>
           </div>
         </li>
         <% } %>

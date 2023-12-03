@@ -1,0 +1,122 @@
+<div id="edit-merchant" class="tab-pane fade show active" role="tabpanel">
+  <div class="card-header py-3">
+    <h4>Edit Merchant</h4>
+  </div>
+    <div class="card shadow mb-4 mt-t active">
+      <div class="card-body">
+        <form action="/admin/merchant/edit/" method="POST" enctype="multipart/form-data">
+          <div class="row g-3">
+            <h4>Detail Merchant</h4>
+            <div class="form-group col-md-6">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                placeholder="Enter name"
+                name="name"
+                value="<%- merchant.name %>"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="Price">Package Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="package_name"
+                placeholder="Enter package name"
+                name="package_name"
+                value="<%- merchant.package_name %>"
+                readonly
+              />
+            </div>
+  
+            <div class="form-group col-md-6">
+              <label for="location">Location</label>
+              <input
+                type="text"
+                class="form-control"
+                id="location"
+                name="location"
+                value="<%- merchant.location %>"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="image">Logo</label>
+              <input
+                type="file"
+                class="form-control"
+                id="image"
+                name="image"
+                single
+              />
+            </div>   
+            <div class="form-group col-md-6" id="cookInputs">
+              <label for="isReady">Status</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="active" id="isReadyTrue" value=1/>
+                <label class="form-check-label" for="isReadyTrue">
+                  Active
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="active" id="isReadyFalse" value=0/>
+                <label class="form-check-label" for="isReadyFalse">
+                  Inactive
+                </label>
+              </div>
+            </div>
+            <div class="form-group col-md-6">
+              <input
+                type="hidden"
+                class="form-control"
+                id="status"
+                value="<%- merchant.active %>"
+                single
+              />
+            </div>  
+          </div>
+  
+          <div class="row g-3">
+            <h4>Social Media</h4>
+            <div class="form-group col-md-6">
+              <label for="facebook">Facebook</label>
+              <input
+                type="text"
+                class="form-control"
+                id="facebook"
+                name="facebook"
+                value="<%- merchant.facebook %>"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="instagram">Instagram</label>
+              <input
+                type="text"
+                class="form-control"
+                id="instagram"
+                name="instagram"
+                value="<%- merchant.instagram %>"
+              />
+            </div>
+  
+          </div>
+  
+          <button type="submit" class="btn btn-primary">Save Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const merchantActive = document.getElementById('status') === 1;
+
+    const isReadyTrue = document.getElementById('isReadyTrue');
+    const isReadyFalse = document.getElementById('isReadyFalse');
+
+    if (merchantActive) {
+      isReadyTrue.checked = true;
+    } else {
+      isReadyFalse.checked = true;
+    }
+  </script>

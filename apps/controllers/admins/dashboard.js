@@ -8,21 +8,18 @@ module.exports = {
   viewDashboard: async (req, res) => {
     try {
       const { user, merchant } = req.app.locals;
-      console.log("user dari dashboard", user)
-      console.log("merchant dari dashboard", merchant)
 
       const where = () => ({ 
-          deleted: { [Op.eq]: 0 },
-          ...user.merchant_id && {
-              merchant_id: { [Op.eq]: user.merchant_id }
-          }
+        ...user.merchant_id && {
+          merchant_id: { [Op.eq]: user.merchant_id }
+        },
+        deleted: { [Op.eq]: 0 },
       })
 
       const total = {
-        ...user.role === 'superadmin' && { merchant: await tMerchant.count({ where: where })},
-        category: await tCategory.count({ where: where }),
-        product: await tProduct.count({ where: where }),
-
+        ...user.role === 'superadmin' && { merchant: await tMerchant.count({ where: { deleted: { [Op.eq]: 0 },} })},
+        category: await tCategory.count({ where: where() }),
+        product: await tProduct.count({ where: where() }),
       }
 
       let merchants
@@ -41,6 +38,25 @@ module.exports = {
       res.render("error", {
         err,
       });
+    }
+  },
+
+  changeMerchant: async (req, res) => {
+    const { user, merchant } = req.app.locals;
+    const session = req.session.user
+    const { id } = req.params
+    try {
+
+      console.log("session sebelum", session)
+      session.merchant_id = id
+      console.log("session change merchant", session)
+
+      res.redirect("/admin/");
+    } catch (err) {
+      console.log(err);
+      req.flash("alertMessage", `${err.message}`);
+      req.flash("alertStatus", "danger");
+      res.redirect("/admin/account");
     }
   },
 };

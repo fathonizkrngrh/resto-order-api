@@ -7,6 +7,25 @@ const CONFIG = require('../../config')
 const model = require("../../models/mysql")
 const tAccount = model.accounts
 
+module.exports.signinPage = async (req, res) => {
+    const alertMessage = req.flash("alertMessage");
+    const alertStatus = req.flash("alertStatus");
+    const alert = {
+        message: alertMessage,
+        status: alertStatus,
+    };
+    try {
+      res.render("admin/auth/signin", {
+        title: "RestoOrder | Dashboard",
+        alert
+      });
+    } catch (err) {
+      res.render("error", {
+        err,
+      });
+    }
+}
+
 module.exports.signin = async (req, res) => {
     const { phonemail, password } = req.body
 
@@ -56,7 +75,6 @@ module.exports.signin = async (req, res) => {
             role: account.role,
             staff_id: account?.staff_id || null,
         };
-        console.log(req.session)
 
         return res.redirect("/admin/");
     } catch (error) {
@@ -64,21 +82,15 @@ module.exports.signin = async (req, res) => {
     }
 };
 
-module.exports.signinPage = async (req, res) => {
-    const alertMessage = req.flash("alertMessage");
-    const alertStatus = req.flash("alertStatus");
-    const alert = {
-        message: alertMessage,
-        status: alertStatus,
-    };
+module.exports.signout = async (req, res) => {
     try {
-      res.render("admin/auth/signin", {
-        title: "RestoOrder | Dashboard",
-        alert
-      });
-    } catch (err) {
-      res.render("error", {
-        err,
-      });
+        req.session.destroy();
+
+        return res.redirect("/admin/signin");;
+    } catch (error) {
+        req.flash("alertMessage", `${error.message}`);
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/signin");
     }
-}
+};
+

@@ -1,0 +1,115 @@
+<div id="add-account" class="tab-pane fade">
+  <div class="card shadow mb-4 mt-t">
+    <div class="card-header py-3">
+      <h4>Add Account</h4>
+    </div>
+    <div class="card-body">
+      <form action="/admin/account" method="POST">
+        <div class="row g-3">
+          <h4>Detail Account</h4>
+          <div class="form-group col-md-6">
+            <label for="merchant">Merchant</label>
+            <select class="form-select" name="merchant_id">
+              <option selected value="">--- Merchant ---</option>
+              <% for (let i = 0; i< merchants.length; i++) { %>
+              <option value="<%= merchants[i].package_name %>">
+                <%= merchants[i].name %>
+              </option>
+              <% } %>
+            </select>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="role">Role</label>
+            <select class="form-select" name="role">
+              <option selected value="">--- Role ---</option>
+              <option value="superadmin">Superadmin</option>
+              <option value="admin">Admin</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="name">Name</label>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              placeholder="Enter name"
+              name="name"
+              required
+            />
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              placeholder="Enter username"
+              name="username"
+              required
+            />
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="phone">Phone Number</label>
+            <input
+              type="text"
+              class="form-control"
+              id="phone"
+              placeholder="Enter phone"
+              name="phone"
+              required
+            />
+          </div>
+        <div class="row g-3">
+          <h4>Authentication Account</h4>
+          <div class="form-group col-md-6">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              placeholder="Enter email"
+              name="email"
+              required
+            />
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="password">Password</label>
+            <input
+              type="text"
+              class="form-control"
+              id="password"
+              name="password"
+              required
+            />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const typeSelect = document.getElementById('typeSelect');
+  const stockInput = document.getElementById('stockInput');
+  const cookInputs = document.getElementById('cookInputs');
+
+  typeSelect.addEventListener('change', function () {
+    if (this.value === 'stock') {
+      stockInput.style.display = 'block';
+      cookInputs.style.display = 'none';
+    } else if (this.value === 'cook') {
+      cookInputs.style.display = 'block';
+      stockInput.style.display = 'none';
+    } else {
+      stockInput.style.display = 'none';
+      cookInputs.style.display = 'none';
+    }
+  });
+</script>

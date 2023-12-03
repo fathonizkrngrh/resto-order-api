@@ -16,6 +16,8 @@ const cCart = require("../controllers/apis/carts");
 const cDashboard = require("../controllers/admins/dashboard");
 const cAdminCategory = require("../controllers/admins/categories");
 const cAdminProduct = require("../controllers/admins/products");
+const cAdminMerchant = require("../controllers/admins/merchants");
+const cAdminAccount = require("../controllers/admins/accounts");
 const cAuth = require("../controllers/admins/auth");
 
 //ROUTINGS
@@ -26,11 +28,13 @@ module.exports = (app) => {
   app.use('/admin', adminAuthRouter)
   adminAuthRouter.get("/signin", (req, res) => cAuth.signinPage(req, res));
   adminAuthRouter.post("/signin", (req, res) => cAuth.signin(req, res));
+  adminAuthRouter.get("/signout", (req, res) => cAuth.signout(req, res));
   adminAuthRouter.post("/register", (req, res) => cAuthAdmin.register(req, res));
 
   const adminRouter = express.Router()
   app.use('/admin', middleware.checkAdmin, adminRouter)
   adminRouter.get("/", (req, res) => cDashboard.viewDashboard(req, res));
+  adminRouter.get("/change_merchant/:id", (req, res) => cDashboard.changeMerchant(req, res));
   // category
   adminRouter.get("/category", (req, res) => cAdminCategory.viewCategory(req, res));
   adminRouter.post("/category", (req, res) => cAdminCategory.addCategory(req, res));
@@ -43,6 +47,19 @@ module.exports = (app) => {
   adminRouter.post("/product", multer.upload ,(req, res) => cAdminProduct.addProduct(req, res));
   adminRouter.post("/product/edit", multer.upload ,(req, res) => cAdminProduct.editProduct(req, res));
   adminRouter.delete("/product/:id", (req, res) => cAdminProduct.deleteproduct(req, res));
+  // merchant
+  adminRouter.get("/merchant", (req, res) => cAdminMerchant.viewMerchant(req, res));
+  adminRouter.get("/merchant/:id", (req, res) => cAdminMerchant.showEditMerchant(req, res));
+  adminRouter.post("/merchant", multer.upload ,(req, res) => cAdminMerchant.addMerchant(req, res));
+  adminRouter.post("/merchant/edit", multer.upload ,(req, res) => cAdminMerchant.editMerchant(req, res));
+  adminRouter.post("/merchant/status", (req, res) => cAdminMerchant.updateStatus(req, res));
+  adminRouter.delete("/merchant/:id", (req, res) => cAdminMerchant.deletemerchant(req, res));
+  // account
+  adminRouter.get("/account", middleware.checkSuperAdmin, (req, res) => cAdminAccount.viewAccount(req, res));
+  adminRouter.get("/account/:id", middleware.checkSuperAdmin, (req, res) => cAdminAccount.showEditAccount(req, res));
+  adminRouter.post("/account", middleware.checkSuperAdmin, (req, res) => cAdminAccount.addAccount(req, res));
+  adminRouter.post("/account/edit", middleware.checkSuperAdmin, (req, res) => cAdminAccount.editAccount(req, res));
+  adminRouter.delete("/account/:id", middleware.checkSuperAdmin, (req, res) => cAdminAccount.deletemerchant(req, res));
   
 
   const clientAuthRouter = express.Router()

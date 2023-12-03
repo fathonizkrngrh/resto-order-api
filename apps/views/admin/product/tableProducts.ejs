@@ -11,19 +11,20 @@
         >
           <thead>
             <tr>
-              <th>No</th>
+              <th>Code</th>
               <th>Name</th>
               <th>Price</th>
               <th>Category</th>
               <th>Status</th>
               <th>Stock</th>
+              <th>Point</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <% for(let i = 0; i < product.length; i++){ %>
             <tr>
-              <td><%- i+1 %></td>
+              <td><%- product[i].code %></td>
               <td><%- product[i].name %></td>
               <td>Rp. <%- product[i].price %></td>
               <td><%- product[i].category_name %></td>
@@ -60,10 +61,11 @@
                     </td>
                   <% } %>
               <% } %>
+              <td><%- product[i].point %></td>
 
               <td>
                 <form
-                  action="/admin/product/<%- product[i].id%>/delete?_method=DELETE"
+                  action="/admin/product/<%- product[i].id%>?_method=DELETE"
                   method="POST"
                 >
                   <a
