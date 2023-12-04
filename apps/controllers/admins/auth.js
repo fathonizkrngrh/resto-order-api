@@ -78,7 +78,10 @@ module.exports.signin = async (req, res) => {
 
         return res.redirect("/admin/");
     } catch (error) {
-        res.redirect("/admin/category");
+        console.log(error);
+        req.flash("alertMessage", `${error.message}`);
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/signin");
     }
 };
 

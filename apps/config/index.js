@@ -20,6 +20,10 @@ CONFIG.cloudinary_cloud_name      = process.env.CLOUDINARY_CLOUD_NAME       || '
 CONFIG.jwt_encryption  = process.env.JWT_ENCRYPTION || 'R4h451a13An9Et'
 CONFIG.jwt_expiration  = process.env.JWT_EXPIRATION || '10000'
 
+CONFIG.redist_host    = process.env.REDIS_HOST     || '127.0.0.1'
+CONFIG.redist_port    = process.env.REDIS_PORT     || '6379' 
+CONFIG.redist_url    = process.env.REDIS_URL     || '' 
+
 CONFIG.password_key_encrypt = process.env.SECRET_KEY_ENCRYPTION || 'R4h451a13An9EtLH0'
 
 module.exports = CONFIG

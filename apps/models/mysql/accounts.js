@@ -37,10 +37,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: "super_admin"
     },
-    staff_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,

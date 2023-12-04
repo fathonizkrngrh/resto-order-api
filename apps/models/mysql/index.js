@@ -7,10 +7,12 @@ const env     = process.env.ENV || "development"
 const fs      = require("fs")
 const path    = require("path")
 const setting = databases.resto_order
+console.log(setting)
 
 /* SERVER CLOCK SETTINGS */
 const settingDialect = {
     useUTC: false, dateStrings: true,
+    operatorsAliases: false,
     typeCast: function (field, next) {
         if (field.type === 'DATETIME'||field.type === 'TIMESTAMP') { return field.string() }
         return next()
@@ -19,7 +21,7 @@ const settingDialect = {
 setting.dialectOptions = settingDialect
 // setting.timezone       = '+07:00'
 const Sequelize        = require("sequelize")
-const sequelize        = new Sequelize(setting.database, setting.username, setting.password, setting)
+const sequelize        = setting.url ? new Sequelize(setting.url, setting) : new Sequelize(setting.database, setting.username, setting.password, setting)
 sequelize.dialect.supports.schemas = true
 const shell            = require('shelljs')
 const chalk            = require('chalk')

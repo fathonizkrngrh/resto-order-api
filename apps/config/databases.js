@@ -3,12 +3,13 @@ require('dotenv').config()
 
 module.exports = {
     resto_order: {
+        "url": process.env.DB_URL || '',
         "username": process.env.DB_USERNAME || 'root',
         "password": process.env.DB_PASSWORD || '',
         "host": process.env.DB_HOST || '127.0.0.1',
-        "database": process.env.DB_RESTOORDER_NAME || "resto-order",
-        "port": 3306,
-        "ssl": false,
+        "database": process.env.DB_NAME || "resto-order",
+        "port": process.env.DB_PORT || 3306,
+        "ssl": process.env.DB_SSL ||false,
         "dialect": "mysql",
         "dialectOptions": {},
         "timezone": "Asia/Jakarta"
