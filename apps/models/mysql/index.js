@@ -48,24 +48,24 @@ models.sequelize = sequelize
 models.Sequelize = Sequelize
 
 /* Synchronizations */
-shell.echo(chalk.bgBlue('*** Synchronizing Transactions DB now..'))
-if(env==='production'){
-    models.sequelize.sync({ force: false }).then(() => { }).catch(err => { })
-}else{
-    let sync = false
-    models.sequelize.sync({ force: sync }).then(() => {
-        if(sync){ /* Seeding if Sync TRUE */
-            shell.echo(chalk.bgBlue('*** Seeding Transactions DB now..'))
-            if (!shell.which('sequelize')) {
-                shell.echo(chalk.yellow('Sorry, requires sequelize-cli to seeed the DB.')) 
-                shell.echo(chalk.blue('You can type "npm -i sequelize-cli -g".'))
-            }else{
-                shell.exec('sequelize db:seed:all')
-                shell.echo(chalk.green('*** Seeding Data Finished!'))
-            }
-        }
-    }).catch(err => { /* console.log(err) */ })
-}
+// shell.echo(chalk.bgBlue('*** Synchronizing Transactions DB now..'))
+// if(env==='production'){
+//     models.sequelize.sync({ force: false }).then(() => { }).catch(err => { })
+// }else{
+//     let sync = false
+//     models.sequelize.sync({ force: sync }).then(() => {
+//         if(sync){ /* Seeding if Sync TRUE */
+//             shell.echo(chalk.bgBlue('*** Seeding Transactions DB now..'))
+//             if (!shell.which('sequelize')) {
+//                 shell.echo(chalk.yellow('Sorry, requires sequelize-cli to seeed the DB.')) 
+//                 shell.echo(chalk.blue('You can type "npm -i sequelize-cli -g".'))
+//             }else{
+//                 shell.exec('sequelize db:seed:all')
+//                 shell.echo(chalk.green('*** Seeding Data Finished!'))
+//             }
+//         }
+//     }).catch(err => { /* console.log(err) */ })
+// }
 
 /* Relationships */
 models.categories.hasMany(models.products, { sourceKey: "id", foreignKey: "category_id", as: 'products' })
