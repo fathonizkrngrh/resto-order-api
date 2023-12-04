@@ -52,7 +52,7 @@
     "passport-local": "1.0.0",
     "path": "^0.12.7",
     "redis": "2.8.0",
-    "sequelize": "4.42.0",
+    "sequelize": "^6.35.1",
     "sequelize-cli": "5.4.0",
     "shelljs": "0.8.3",
     "socket.io": "^4.7.2",
