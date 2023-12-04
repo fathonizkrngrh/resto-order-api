@@ -7,7 +7,7 @@ const env     = process.env.ENV || "development"
 const fs      = require("fs")
 const path    = require("path")
 const setting = databases.resto_order
-// const Op      = require("sequelize").Op
+const Op      = require("sequelize").Op
 
 /* SERVER CLOCK SETTINGS */
 const settingDialect = {
