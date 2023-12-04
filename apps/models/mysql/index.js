@@ -7,7 +7,6 @@ const env     = process.env.ENV || "development"
 const fs      = require("fs")
 const path    = require("path")
 const setting = databases.resto_order
-const Op      = require("sequelize").Op
 
 /* SERVER CLOCK SETTINGS */
 const settingDialect = {
@@ -18,16 +17,6 @@ const settingDialect = {
     }
 }
 setting.dialectOptions = settingDialect
-setting.operatorAliasses = {
-    $and: Op.and,
-    $or: Op.or,
-    $eq: Op.eq,
-    $gt: Op.gt,
-    $lt: Op.lt,
-    $lte: Op.lte,
-    $like: Op.like
-}
-console.log(setting)
 // setting.timezone       = '+07:00'
 const Sequelize        = require("sequelize")
 const sequelize        = setting.url ? new Sequelize(setting.url, setting) : new Sequelize(setting.database, setting.username, setting.password, setting)
