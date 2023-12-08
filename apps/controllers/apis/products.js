@@ -120,13 +120,15 @@ module.exports.rewards = async (req, res) => {
     const app = req.app.locals
     
     const user = await tUser.findOne({ 
-        where: {
+        raw: true, where: {
             deleted: { [Op.eq]: 0 },
             merchant_id: { [Op.eq]: app.merchant_id},
             id: { [Op.eq]: app.user_id},
         },
         attributes: ['id', 'current_points']
     })
+
+    console.log(user)
 
     const whereClause = (query) => ({
         deleted: { [Op.eq]: 0 },

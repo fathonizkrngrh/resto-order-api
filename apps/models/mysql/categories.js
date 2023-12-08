@@ -20,6 +20,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    remarks: {
+      type: DataTypes.STRING(100),
+      allowNull: true
+    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,

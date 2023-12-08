@@ -9,7 +9,6 @@ const controller = require("../controllers/apis");
 const cAuthUser = require("../controllers/apis/auth");
 const cCategory = require("../controllers/apis/categories");
 const cProduct = require("../controllers/apis/products");
-const cMerchant = require("../controllers/apis/merchants");
 const cCart = require("../controllers/apis/carts");
 // ADMIN CONTROLLERS
 const cDashboard = require("../controllers/admins/dashboard");
@@ -64,14 +63,14 @@ module.exports = (app) => {
   app.use('/user', clientRouter)
   clientRouter.post("/signin", (req, res) => cAuthUser.signin(req, res));
   clientRouter.post("/signup", (req, res) => cAuthUser.signup(req, res));
-  
+  clientRouter.get("/me", middleware.authentication, (req, res) => cAuthUser.me(req, res));
   
   const productRouter = express.Router()
   app.use('/product', middleware.authentication, productRouter)
   productRouter.get("/category/list", (req, res) => cCategory.list(req, res));
   productRouter.get("/list", (req, res) => cProduct.list(req, res));
-  productRouter.get("/list/top_seller", (req, res) => cProduct.list(req, res));
-  productRouter.get("/list/reward", (req, res) => cProduct.list(req, res));
+  productRouter.get("/list/top_seller", (req, res) => cProduct.top_seler(req, res));
+  productRouter.get("/list/reward", (req, res) => cProduct.rewards(req, res));
 
   const cartRouter = express.Router()
   app.use('/cart', cartRouter)

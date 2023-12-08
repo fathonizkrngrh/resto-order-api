@@ -60,10 +60,6 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL(10,2),
       allowNull: false
     },
-    discount_amount: {
-      type: DataTypes.DECIMAL(10,2),
-      allowNull: false
-    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,

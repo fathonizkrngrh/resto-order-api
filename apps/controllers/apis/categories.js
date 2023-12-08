@@ -30,6 +30,11 @@ module.exports.list = async (req, res) => {
         deleted: { [Op.eq]: 0 },
         merchant_id: { [Op.eq]: app.merchant_id},
         ...query.id && { id: {[Op.eq]: query.id } },
+    })
+
+    const whereProductClause = (query) => ({
+        deleted: { [Op.eq]: 0 },
+        merchant_id: { [Op.eq]: app.merchant_id},
         ...query.search && { 
             [Op.or]: {
                 name: { [Op.like]: `%${query.search}%` },
@@ -50,7 +55,7 @@ module.exports.list = async (req, res) => {
                 include: [{
                     model: tProduct, as: 'products', required: true,
                     attributes: {exclude: ['created_on', 'modified_on', 'deleted']},
-                    where: { deleted: {[Op.eq]: 0}},
+                    where: whereProductClause(req.query),
                     order: [['price', 'ASC']]
                 }],
                 distinct: true,

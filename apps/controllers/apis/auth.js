@@ -128,5 +128,36 @@ module.exports.signup = async (req, res) => {
     }
 }
 
+module.exports.me = async (req, res) => {
+    const app = req.app.locals
+
+    const whereClause = () => ({
+        deleted: { [Op.eq]: 0 },
+        merchant_id: { [Op.eq]: app.merchant_id},
+        id: { [Op.eq]: app.user_id},
+    })
+
+    try {
+        const user = await tUser.findOne({
+            attributes: { exclude: ['created_on', 'modified_on', 'deleted', 'password'] },
+            where: whereClause(),
+        })
+        if (!user) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Pengguna tidak ditemukan.`
+            return res.status(400).json(response)
+        }
+
+        const response = RESPONSE.default
+        response.data  = user
+        return res.status(200).json(response)   
+    } catch (err) {
+        console.log(err)
+        const response = RESPONSE.error('unknown')
+        response.error_message = err.message || catchMessage
+        return res.status(500).json(response)
+    }
+}
+
 //http://www.mysqltutorial.org/mysql-nodejs/
 //https://webapplog.com/handlebars/

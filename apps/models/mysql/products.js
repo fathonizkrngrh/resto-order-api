@@ -64,22 +64,6 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    discount_type: {
-      type: DataTypes.ENUM('fee','percentage'),
-      allowNull: true
-    },
-    discount_amount: {
-      type: DataTypes.DECIMAL(10,2),
-      allowNull: true
-    },
-    discount_date_start: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    discount_date_end: {
-      type: DataTypes.STRING(100),
-      allowNull: true
-    },
     created_on: {
       type: DataTypes.DATE,
       allowNull: false,
