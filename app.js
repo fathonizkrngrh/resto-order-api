@@ -75,8 +75,8 @@ app.routes = require("./apps/routes")(app);
 // catch 404 and forward to error handler
 app.use((req, res) => {
     const response = RESPONSE.error('unknown')
-    response.error_message = 'Tidak dapat menyimpan data. Silahkan laporakan kendala ini.'
-    return res.status(500).json(response)
+    response.error_message = 'Resource not found.'
+    return res.status(404).json(response)
   }
 );
 
