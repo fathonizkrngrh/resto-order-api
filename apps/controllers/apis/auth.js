@@ -6,6 +6,7 @@ const UTILITIES = require("../../utilities");
 const CONFIG = require('../../config')
 const model = require("../../models/mysql");
 const { generateToken } = require('../../utilities/token');
+const { google } = require('../../config/oauth');
 const tUser = model.users
 
 module.exports.signin = async (req, res) => {
@@ -62,13 +63,12 @@ module.exports.signin = async (req, res) => {
 };
 
 module.exports.signup = async (req, res) => {
-    // Destructure request body for required data
     let {
-        username, email, password, password_confirmation, phone
+        username, email, password, password_confirmation
     } = req.body
 
     try {
-        const requiredAttributes = { username: "username", email: 'Email', phone: 'Nomor Telepon', password: 'Password', password_confirmation: "Password Konfirmasi" }
+        const requiredAttributes = { username: "username", email: 'Email', password: 'Password', password_confirmation: "Password Konfirmasi" }
         for (const key of Object.keys(requiredAttributes)) {
             if (!req.body[key]) {
                 const response = RESPONSE.error('unknown')
@@ -128,6 +128,70 @@ module.exports.signup = async (req, res) => {
     }
 }
 
+module.exports.google_callback = async (req, res) => {
+    let { credential } = req.body
+
+    try {
+        if (!credential) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Permintaan tidak lengkap. Masukan Kredensial.`
+            return res.status(400).json(response)
+        }
+
+        const ticket = google.verifyIdToken({ idToken: credential, audience: CONFIG.google_client_id })
+        .catch((error) => {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Kredensial tidak valid.`
+            return res.status(400).json(response)
+        });
+
+        const payload = ticket.getPayload();
+
+        const user = await tUser.findOne({
+            raw: true, where: {
+                merchant_id: { [Op.eq]: req.header('X-MERCHANT-ID') },
+                email: { [Op.eq]: payload.email },
+                deleted: { [Op.eq]: 0 },
+            }
+        })
+
+        if (!user) {
+            const password = await generateOAuthPassword(payload.email);
+
+            const newUser = await tUser.create({ 
+                username: payload.name, phone: null,
+                email: payload.email, password: password, 
+                merchant_id: req.header('X-MERCHANT-ID') 
+            })
+        
+            const token = generateToken(newUser)
+
+            const response = RESPONSE.default;
+            response.data = {
+                user_id: newUser.id,
+                merchant_id: newUser.merchant_id,
+                token: token
+            };
+            res.status(200).send(response);
+        }
+
+        const token = generateToken(user)
+
+        const response = RESPONSE.default;
+        response.data = {
+            user_id: user.id,
+            merchant_id: user.merchant_id,
+            token: token
+        };
+        res.status(200).send(response);
+    } catch (error) {
+        console.log(error)
+        const response = RESPONSE.error('unknown')
+        response.error_message = error.message
+        return res.status(500).json(response)
+    }
+}
+
 module.exports.me = async (req, res) => {
     const app = req.app.locals
 
@@ -158,6 +222,8 @@ module.exports.me = async (req, res) => {
         return res.status(500).json(response)
     }
 }
+
+
 
 //http://www.mysqltutorial.org/mysql-nodejs/
 //https://webapplog.com/handlebars/

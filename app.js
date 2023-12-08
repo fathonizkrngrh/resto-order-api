@@ -1,5 +1,6 @@
 "use strict";
-const config = require("./apps/config");
+const CONFIG = require("./apps/config");
+const RESPONSE = require("./apps/utilities/response");
 // EXPRESS
 const session = require("express-session");
 const methodOverride = require("method-override");
@@ -12,7 +13,7 @@ const app = express();
 
 // LOGGER FOR DEV
 const logger = require("morgan");
-if (config.env === "development") {
+if (CONFIG.env === "development") {
   app.use(logger("dev"));
 }
 
@@ -70,5 +71,17 @@ app.models.mysql = require("./apps/models/mysql");
 app.models.buffer= require('./apps/models/redis')
 // CONTROLLERS ROUTE
 app.routes = require("./apps/routes")(app);
+
+// catch 404 and forward to error handler
+app.use((req, res) => {
+    const response = RESPONSE.error('unknown')
+    response.error_message = 'Tidak dapat menyimpan data. Silahkan laporakan kendala ini.'
+    return res.status(500).json(response)
+  }
+);
+
+app.listen(CONFIG.port, () => {
+  console.info(`======= Server is running on http://localhost:${CONFIG.port} =======`);
+});
 
 module.exports = app;

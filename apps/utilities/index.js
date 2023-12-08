@@ -1,4 +1,6 @@
 "use state"
+const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 module.exports.generateRandomNumber = (length) => {
     let result = '';
@@ -29,3 +31,15 @@ module.exports.parsePhoneNumber = (phone) => {
     else if (phone.substr(0, 3) == '+62') { phone = '62' + phone.substr(3, phone.length - 1) }
     return phone
 }
+
+module.exports.generateOAuthUsername = (name) => {
+    const replacedUsername = name.replace(/\s+/g, '-').toLowerCase();
+    const randomString = crypto.randomBytes(2).toString('hex');
+    return `${replacedUsername}-${randomString}`;
+},
+    
+module.exports.generateOAuthPassword = async (email) => {
+    const randomString = crypto.randomBytes(2).toString('hex');
+    return crypto.createHash('sha1').update(`${email.trim()}${CONFIG.password_key_encrypt}${randomString}`).digest('hex')
+}
+  

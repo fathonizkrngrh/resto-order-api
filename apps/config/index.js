@@ -22,7 +22,11 @@ CONFIG.jwt_expiration  = process.env.JWT_EXPIRATION || '10000'
 
 CONFIG.redist_host    = process.env.REDIS_HOST     || '127.0.0.1'
 CONFIG.redist_port    = process.env.REDIS_PORT     || '6379' 
-CONFIG.redist_url    = process.env.REDIS_URL     || '' 
+CONFIG.redist_url     = process.env.REDIS_URL     || '' 
+
+CONFIG.google_client_id     = process.env.GOOGLE_CLIENT_ID     || ''
+CONFIG.google_client_secret = process.env.GOOGLE_CLIENT_SECRET     || '' 
+CONFIG.google_redirect_uri  = process.env.GOOGLE_REDIRECT_URI     || '' 
 
 CONFIG.password_key_encrypt = process.env.SECRET_KEY_ENCRYPTION || 'R4h451a13An9EtLH0'
 

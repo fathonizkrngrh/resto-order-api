@@ -63,6 +63,7 @@ module.exports = (app) => {
   app.use('/user', clientRouter)
   clientRouter.post("/signin", (req, res) => cAuthUser.signin(req, res));
   clientRouter.post("/signup", (req, res) => cAuthUser.signup(req, res));
+  clientRouter.post("/google_callback", (req, res) => cAuthUser.google_callback(req, res));
   clientRouter.get("/me", middleware.authentication, (req, res) => cAuthUser.me(req, res));
   
   const productRouter = express.Router()
