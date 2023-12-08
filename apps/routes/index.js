@@ -6,8 +6,7 @@ const middleware = require("../middlewares")
 const multer = require("../middlewares/multer")
 //CONTROLLERS
 const controller = require("../controllers/apis");
-const cAuthAdmin = require("../controllers/apis/auth");
-const cAuthUser = require("../controllers/apis/user_auth");
+const cAuthUser = require("../controllers/apis/auth");
 const cCategory = require("../controllers/apis/categories");
 const cProduct = require("../controllers/apis/products");
 const cMerchant = require("../controllers/apis/merchants");
@@ -29,7 +28,6 @@ module.exports = (app) => {
   adminAuthRouter.get("/signin", (req, res) => cAuth.signinPage(req, res));
   adminAuthRouter.post("/signin", (req, res) => cAuth.signin(req, res));
   adminAuthRouter.get("/signout", (req, res) => cAuth.signout(req, res));
-  adminAuthRouter.post("/register", (req, res) => cAuthAdmin.register(req, res));
 
   const adminRouter = express.Router()
   app.use('/admin', middleware.checkAdmin, adminRouter)
@@ -61,35 +59,19 @@ module.exports = (app) => {
   adminRouter.post("/account/edit", middleware.checkSuperAdmin, (req, res) => cAdminAccount.editAccount(req, res));
   adminRouter.delete("/account/:id", middleware.checkSuperAdmin, (req, res) => cAdminAccount.deletemerchant(req, res));
   
-
-  const clientAuthRouter = express.Router()
-  app.use('/user', clientAuthRouter)
-  clientAuthRouter.post("/signin", (req, res) => cAuthUser.signin(req, res));
-  clientAuthRouter.post("/register", (req, res) => cAuthUser.register(req, res));
-
-  const merchantRouter = express.Router()
-  app.use('/merchant', merchantRouter)
-  merchantRouter.get("/list", (req, res) => cMerchant.list(req, res));
-  merchantRouter.get("/", (req, res) => cMerchant.detail(req, res));
-  merchantRouter.post("/", (req, res) => cMerchant.create(req, res));
-  merchantRouter.patch("/", (req, res) => cMerchant.update(req, res));
-  merchantRouter.patch("/", (req, res) => cMerchant.delete(req, res));
+  // Api Router
+  const clientRouter = express.Router()
+  app.use('/user', clientRouter)
+  clientRouter.post("/signin", (req, res) => cAuthUser.signin(req, res));
+  clientRouter.post("/signup", (req, res) => cAuthUser.signup(req, res));
   
-  const categoryRouter = express.Router()
-  app.use('/category', categoryRouter)
-  categoryRouter.get("/list", (req, res) => cCategory.list(req, res));
-  categoryRouter.get("/", (req, res) => cCategory.detail(req, res));
-  categoryRouter.post("/", (req, res) => cCategory.create(req, res));
-  categoryRouter.patch("/", (req, res) => cCategory.update(req, res));
-  categoryRouter.patch("/", (req, res) => cCategory.delete(req, res));
-
+  
   const productRouter = express.Router()
-  app.use('/product', productRouter)
+  app.use('/product', middleware.authentication, productRouter)
+  productRouter.get("/category/list", (req, res) => cCategory.list(req, res));
   productRouter.get("/list", (req, res) => cProduct.list(req, res));
-  productRouter.get("/", (req, res) => cProduct.detail(req, res));
-  productRouter.post("/", (req, res) => cProduct.create(req, res));
-  productRouter.patch("/", (req, res) => cProduct.update(req, res));
-  productRouter.patch("/", (req, res) => cProduct.delete(req, res));
+  productRouter.get("/list/top_seller", (req, res) => cProduct.list(req, res));
+  productRouter.get("/list/reward", (req, res) => cProduct.list(req, res));
 
   const cartRouter = express.Router()
   app.use('/cart', cartRouter)
