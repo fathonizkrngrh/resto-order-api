@@ -44,6 +44,10 @@ module.exports.list = async (req, res) => {
         const list = await tProduct.findAndCountAll({
             attributes: { exclude: ['created_on', 'modified_on', 'deleted'] },
             where: whereClause(req.query),
+            include: [{
+                model: tCategory, required: true, as: 'category',
+                attributes: { exclude: ['created_on', 'modified_on', 'deleted'] },
+            }],
             ...req.query.pagination == 'true' && {
                 offset      : offset,
                 limit       : limit

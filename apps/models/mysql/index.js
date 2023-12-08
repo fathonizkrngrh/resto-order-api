@@ -69,6 +69,7 @@ models.Sequelize = Sequelize
 
 /* Relationships */
 models.categories.hasMany(models.products, { sourceKey: "id", foreignKey: "category_id", as: 'products' })
+models.products.belongsTo(models.categories, { sourceKey: "id", foreignKey: "category_id", as: 'category' })
 
 // models.carts.hasOne(models.products, { sourceKey: "id", foreignKey: "product_id", as: 'product' })
 // models.products.belongsTo(models.carts, { sourceKey: "id", foreignKey: "product_id", as: 'product' })

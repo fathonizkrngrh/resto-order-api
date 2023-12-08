@@ -93,16 +93,13 @@ module.exports.add_to_cart = async (req, res) => {
         return res.status(400).json(response)
     }
 
-    const discountPrice = product.discount_type ? ( product.discount_type == 'fee' ? +product.discount_amount : +product.price * product.discount_amount ) : 0
-    const curentPrice = +product.price - +discountPrice
-
     try {
         const created = await tCart.create({
             merchant_id: req.header('x-merchant-id') ,
             user_id: req.header('x-user-id') ,
             qty: +body.qty,
-            subtotal: curentPrice,
-            total: +curentPrice * +body.qty,
+            subtotal: product.price,
+            total: (product.price * 0.1) + product.price,
             status: 'waiting',
         })
 

@@ -1,5 +1,5 @@
 "use strict";
-
+const RESPONSE = require("../utilities/response")
 const express = require("express");
 //  Middleware
 const middleware = require("../middlewares")
@@ -10,6 +10,7 @@ const cAuthUser = require("../controllers/apis/auth");
 const cCategory = require("../controllers/apis/categories");
 const cProduct = require("../controllers/apis/products");
 const cCart = require("../controllers/apis/carts");
+const cRank = require("../controllers/apis/user_ranks");
 // ADMIN CONTROLLERS
 const cDashboard = require("../controllers/admins/dashboard");
 const cAdminCategory = require("../controllers/admins/categories");
@@ -65,6 +66,8 @@ module.exports = (app) => {
   apiRouter.post("/user/signup", (req, res) => cAuthUser.signup(req, res));
   apiRouter.post("/user/google_callback", (req, res) => cAuthUser.google_callback(req, res));
   apiRouter.get("/user/me", middleware.authentication, (req, res) => cAuthUser.me(req, res));
+
+  apiRouter.get("/rank/list", middleware.authentication, (req, res) => cRank.rank(req, res));
   
   apiRouter.get("/product/category/list", middleware.authentication, (req, res) => cCategory.list(req, res));
   apiRouter.get("/product/list", middleware.authentication, (req, res) => cProduct.list(req, res));
@@ -76,4 +79,12 @@ module.exports = (app) => {
   cartRouter.get("/list", (req, res) => cCart.list(req, res));
   cartRouter.post("/", (req, res) => cCart.add_to_cart(req, res));
   cartRouter.patch("/", (req, res) => cCart.delete(req, res));
+
+  // catch 404 and forward to error handler
+  app.use((req, res) => {
+    const response = RESPONSE.error('unknown')
+    response.error_message = 'Resource not found.'
+    return res.status(404).json(response)
+  }
+  );
 };
