@@ -72,14 +72,6 @@ app.models.buffer= require('./apps/models/redis')
 // CONTROLLERS ROUTE
 app.routes = require("./apps/routes")(app);
 
-// catch 404 and forward to error handler
-app.use((req, res) => {
-    const response = RESPONSE.error('unknown')
-    response.error_message = 'Resource not found.'
-    return res.status(404).json(response)
-  }
-);
-
 app.listen(CONFIG.port, () => {
   console.info(`======= Server is running on http://localhost:${CONFIG.port} =======`);
 });

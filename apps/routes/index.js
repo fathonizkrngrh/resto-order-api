@@ -59,19 +59,17 @@ module.exports = (app) => {
   adminRouter.delete("/account/:id", middleware.checkSuperAdmin, (req, res) => cAdminAccount.deletemerchant(req, res));
   
   // Api Router
-  const clientRouter = express.Router()
-  app.use('/user', clientRouter)
-  clientRouter.post("/signin", (req, res) => cAuthUser.signin(req, res));
-  clientRouter.post("/signup", (req, res) => cAuthUser.signup(req, res));
-  clientRouter.post("/google_callback", (req, res) => cAuthUser.google_callback(req, res));
-  clientRouter.get("/me", middleware.authentication, (req, res) => cAuthUser.me(req, res));
+  const apiRouter = express.Router()
+  app.use('/api', apiRouter)
+  apiRouter.post("/user/signin", (req, res) => cAuthUser.signin(req, res));
+  apiRouter.post("/user/signup", (req, res) => cAuthUser.signup(req, res));
+  apiRouter.post("/user/google_callback", (req, res) => cAuthUser.google_callback(req, res));
+  apiRouter.get("/user/me", middleware.authentication, (req, res) => cAuthUser.me(req, res));
   
-  const productRouter = express.Router()
-  app.use('/product', middleware.authentication, productRouter)
-  productRouter.get("/category/list", (req, res) => cCategory.list(req, res));
-  productRouter.get("/list", (req, res) => cProduct.list(req, res));
-  productRouter.get("/list/top_seller", (req, res) => cProduct.top_seler(req, res));
-  productRouter.get("/list/reward", (req, res) => cProduct.rewards(req, res));
+  apiRouter.get("/product/category/list", middleware.authentication, (req, res) => cCategory.list(req, res));
+  apiRouter.get("/product/list", middleware.authentication, (req, res) => cProduct.list(req, res));
+  apiRouter.get("/product/list/top_seller", middleware.authentication, (req, res) => cProduct.top_seler(req, res));
+  apiRouter.get("/product/list/reward", middleware.authentication, (req, res) => cProduct.rewards(req, res));
 
   const cartRouter = express.Router()
   app.use('/cart', cartRouter)
