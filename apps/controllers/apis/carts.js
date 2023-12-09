@@ -57,6 +57,38 @@ module.exports.list = async (req, res) => {
 }
 
 /**
+ * Function Count of Cart's
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+module.exports.count = async (req, res) => {
+    const app               = req.app.locals
+
+    try {
+        const total = await tCart.count({
+            attributes: { exclude: ['modified_on', 'deleted'] },
+            where: {
+                deleted: { [Op.eq]: 0 },
+                merchant_id: { [Op.eq]: app.merchant_id },
+                user_id: { [Op.eq]: app.user_id },
+                status: { [Op.eq]: 'waiting' },
+            },
+        })
+
+        const response = RESPONSE.default
+        response.data  = { total: total}
+        return res.status(200).json(response)   
+    } catch (err) {
+        console.log(err)
+        const response = RESPONSE.error('unknown')
+        response.error_message = err.message || catchMessage
+        return res.status(500).json(response)
+    }
+}
+
+/**
  * Function Create Cart's
  * 
  * @param {*} req 

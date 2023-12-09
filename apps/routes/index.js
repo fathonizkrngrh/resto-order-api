@@ -77,6 +77,7 @@ module.exports = (app) => {
   apiRouter.post("/product/add_to_cart", middleware.authentication, (req, res) => cCart.add_to_cart(req, res));
 
   apiRouter.get("/cart/list", middleware.authentication, (req, res) => cCart.list(req, res));
+  apiRouter.get("/cart/count", middleware.authentication, (req, res) => cCart.count(req, res));
   apiRouter.delete("/cart/delete", middleware.authentication, (req, res) => cCart.delete(req, res));
   
   apiRouter.post("/transaction/order", middleware.authentication, (req, res) => cTransaction.checkout(req, res));

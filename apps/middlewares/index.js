@@ -33,6 +33,7 @@ module.exports.authentication = async (req, res, next) => {
             return res.status(401).json(response)
         }
 
+        console.log(decoded)
         let user
         try{
             user = await tUser.findOne({ raw: true, where: { id: {[Op.eq]: decoded.user_id}, merchant_id: {[Op.eq]: decoded.merchant_id}, deleted: {[Op.eq]: 0}}})
