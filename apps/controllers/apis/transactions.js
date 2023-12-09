@@ -16,17 +16,17 @@ module.exports.list = async (req, res) => {
     const page              = req.query.page || 0
     const size              = req.query.size || 10
     const { limit, offset } = pagination.parse(page, size)
+    const app               = req.app.locals
 
     let { order_by, order_type } = req.query
 
     try {
         const list = await tTransaction.findAndCountAll({
             attributes: { exclude: ['modified_on', 'deleted'] },
-            raw: true,
             where: {
                 deleted: { [Op.eq]: 0 },
-                merchant_id: { [Op.eq]: req.header("X-merchant-ID") },
-                user_id: { [Op.eq]: req.header("X-USER-ID") },
+                merchant_id: { [Op.eq]: app.merchant_id },
+                user_id: { [Op.eq]: app.user_id },
             },
             include: [{
                 model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: ['created_on', 'modified_on', 'deleted']}
@@ -51,7 +51,8 @@ module.exports.list = async (req, res) => {
 }
 
 module.exports.checkout = async (req, res) => {
-    const body = req.body
+    const body  = req.body
+    const app   = req.app.locals
 
     if (!body.table_number) {
         const response = RESPONSE.error('unknown')
@@ -59,42 +60,133 @@ module.exports.checkout = async (req, res) => {
         return res.status(400).json(response)
     }
 
-    const product = await tProduct.findOne({raw: true, where: {
-        merchant_id: { [Op.eq]: req.header('x-merchant-id')},
-        deleted: { [Op.eq]: 0 },
-        product_id: {[Op.eq]: body.product_id }}
+    const exclude = ['created_on', 'modified_on', 'deleted']
+
+    const carts = await tCart.findAll({
+        raw: true, where: {
+            merchant_id: { [Op.eq]: app.merchant_id},
+            user_id: { [Op.eq]: app.user_id},
+            deleted: { [Op.eq]: 0 },
+            status: { [Op.eq]: 'waiting' },
+        },
+        include: [{
+            model: tProduct, required: false, as: 'product', 
+            attributes: { exclude: exclude }
+        }]
     })
-    if (!product) {
+    if (!carts) {
         const response = RESPONSE.error('unknown')
-        response.error_message = `Produk not found.`
-        return res.status(400).json(response)
-    }
-    if (product.stock == 0 && product.ready == 0) {
-        const response = RESPONSE.error('unknown')
-        response.error_message = `Produk sedang tidak tersedia.`
-        return res.status(400).json(response)
-    }
-    if (+qty > +20) {
-        const response = RESPONSE.error('unknown')
-        response.error_message = `Mencapai pembelian maksimal produk ${product.name}.`
+        response.error_message = `Keranjang masih kosong.`
         return res.status(400).json(response)
     }
 
-    const discountPrice = product.discount_type ? ( product.discount_type == 'fee' ? +product.discount_amount : +product.price * product.discount_amount ) : 0
-    const curentPrice = +product.price - +discountPrice
+    const converted = app.merchant_id.split('.').map(word => word.charAt(0).toUpperCase()).join('');
+    const trx_code = [`${converted}`.padEnd(4, '0'), String(Math.round((new Date()).getTime()))].join('')
+
+    let transaction = {}, transaction_details = [], updatedProducts = [], updatedCarts = []
+    carts.forEach( async (cart) => {
+        const product = cart.product
+        if (!product) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Produk tidak ditemukan.`
+            return res.status(400).json(response)
+        }
+        if (product.stock == 0 && product.ready == 1) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Produk ${product.name} sedang tidak tersedia.`
+            return res.status(400).json(response)
+        }
+        if (product.type == 'stock' && (+cart.qty < +product.stock)) {
+            const response = RESPONSE.error('unknown')
+            response.error_message = `Stok produk ${product.name} tidak tersedia.`
+            return res.status(400).json(response)
+        }
+        // create transaction details
+        transaction_details.push({
+            merchant_id: app.merchant_id, user_id: app.user_id,
+            trx_code, cart_id: cart.id, product_id: product.id,
+            qty: cart.qty, notes: cart.notes,
+            subtotal: cart.subtotal, tax: cart.tax,
+        })
+        // transaction attributes
+        transaction.tax += cart.tax
+        transaction.total += cart.total
+        transaction.point += product.point
+        // update product
+        updatedProducts.push(
+            await tProduct.update({
+                ...product.type == 'stock' && { stock: +product.stock - +cart.qty },
+                total_order: +product.total_order + cart.qty
+            },{
+                where: {
+                    merchant_id: { [Op.eq]: app.merchant_id },
+                    product_id: { [Op.eq]: product.id },
+                    deleted: { [Op.eq]: 0 },
+                }
+            })
+        )
+
+        updatedCarts.push(
+            await tCart.update({ status: 'ordered'}, { where: {
+                merchant_id: { [Op.eq]: app.merchant_id },
+                user_id: { [Op.eq]: app.user_id },
+                deleted: { [Op.eq]: 0 }, 
+                id: { [Op.eq]: cart.id },
+            }})
+        )
+    });
+
+    transaction = {
+        ...transaction, trx_code,
+        merchant_id: app.merchant_id, user_id: app.user_id,
+        table_number: body.table_number, status: 'waiting',
+    }
 
     try {
-        const created = await tCart.create({
-            merchant_id: req.header('x-merchant-id') ,
-            user_id: req.header('x-user-id') ,
-            qty: +body.qty,
-            subtotal: curentPrice,
-            total: +curentPrice * +body.qty,
-            status: 'waiting',
+        await Promise.all([
+            tTransactionDetail.bulkCreate(transaction_details),
+            tTransaction.create(transaction),
+            updatedProducts,
+            updatedCarts
+        ])
+
+        const response = RESPONSE.default
+        response.data  = { ...transaction, transaction_details}
+        return res.status(200).json(response)   
+    } catch (err) {
+        console.log(err)
+        const response = RESPONSE.error('unknown')
+        response.error_message = err.message || catchMessage
+        return res.status(500).json(response)
+    }
+}
+
+module.exports.check_status = async (req, res) => {
+    const app  = req.app.locals
+    const body = req.body
+
+    if (!body.id) {
+        const response = RESPONSE.error('unknown')
+        response.error_message = `Permintaan tidak lengkap. Masukka ID dari transaksi`
+        return res.status(400).json(response)
+    }
+
+    try {
+        const trx = await tTransaction.findOne({
+            attributes: { exclude: ['modified_on', 'deleted'] },
+            raw: true, where: {
+                deleted: { [Op.eq]: 0 },
+                merchant_id: { [Op.eq]: app.merchant_id },
+                user_id: { [Op.eq]: app.user_id },
+                id: { [Op.eq]: body.id },
+            },
+            include: [{
+                model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: ['created_on', 'modified_on', 'deleted']}
+            }],
         })
 
         const response = RESPONSE.default
-        response.data  = created
+        response.data  = trx
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)

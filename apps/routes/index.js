@@ -10,6 +10,7 @@ const cAuthUser = require("../controllers/apis/auth");
 const cCategory = require("../controllers/apis/categories");
 const cProduct = require("../controllers/apis/products");
 const cCart = require("../controllers/apis/carts");
+const cTransaction = require("../controllers/apis/transactions");
 const cRank = require("../controllers/apis/user_ranks");
 // ADMIN CONTROLLERS
 const cDashboard = require("../controllers/admins/dashboard");
@@ -73,6 +74,14 @@ module.exports = (app) => {
   apiRouter.get("/product/list", middleware.authentication, (req, res) => cProduct.list(req, res));
   apiRouter.get("/product/list/top_seller", middleware.authentication, (req, res) => cProduct.top_seler(req, res));
   apiRouter.get("/product/list/reward", middleware.authentication, (req, res) => cProduct.rewards(req, res));
+  apiRouter.post("/product/add_to_cart", middleware.authentication, (req, res) => cCart.add_to_cart(req, res));
+
+  apiRouter.get("/cart/list", middleware.authentication, (req, res) => cCart.list(req, res));
+  apiRouter.delete("/cart/delete", middleware.authentication, (req, res) => cCart.delete(req, res));
+  
+  apiRouter.post("/transaction/order", middleware.authentication, (req, res) => cTransaction.checkout(req, res));
+  apiRouter.get("/transaction/list", middleware.authentication, (req, res) => cTransaction.list(req, res));
+  apiRouter.post("/transaction/status", middleware.authentication, (req, res) => cTransaction.check_status(req, res));
 
   const cartRouter = express.Router()
   app.use('/cart', cartRouter)

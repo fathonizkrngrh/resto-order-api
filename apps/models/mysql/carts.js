@@ -40,6 +40,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DECIMAL(10,2),
       allowNull: false
     },
+    tax: {
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false
+    },
     total: {
       type: DataTypes.DECIMAL(10,2),
       allowNull: false

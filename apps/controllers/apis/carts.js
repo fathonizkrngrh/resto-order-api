@@ -28,7 +28,6 @@ module.exports.list = async (req, res) => {
     try {
         const list = await tCart.findAndCountAll({
             attributes: { exclude: ['modified_on', 'deleted'] },
-            raw: true,
             where: {
                 deleted: { [Op.eq]: 0 },
                 merchant_id: { [Op.eq]: app.merchant_id },
@@ -68,7 +67,7 @@ module.exports.add_to_cart = async (req, res) => {
     const body  = req.body
     const app   = req.app.locals
 
-    if (!body.product_id || !body.qty || !body.notes) {
+    if (!body.product_id || !body.qty ) {
         const response = RESPONSE.error('unknown')
         response.error_message = `Permintaan tidak lengkap.`
         return res.status(400).json(response)
@@ -77,7 +76,7 @@ module.exports.add_to_cart = async (req, res) => {
     const product = await tProduct.findOne({raw: true, where: {
         merchant_id: { [Op.eq]: app.merchant_id},
         deleted: { [Op.eq]: 0 },
-        product_id: {[Op.eq]: body.product_id }}
+        id: {[Op.eq]: body.product_id }}
     })
     if (!product) {
         const response = RESPONSE.error('unknown')
@@ -89,24 +88,60 @@ module.exports.add_to_cart = async (req, res) => {
         response.error_message = `Produk sedang tidak tersedia.`
         return res.status(400).json(response)
     }
-    if (+qty > +20) {
+    if (product.type == 'stock' && (+body.qty > +product.stock)) {
+        console.log('masuk 1')
+        const response = RESPONSE.error('unknown')
+        response.error_message = `Stok produk ${product.name} tidak tersedia.`
+        return res.status(400).json(response)
+    }
+    if (+body.qty > +20) {
         const response = RESPONSE.error('unknown')
         response.error_message = `Mencapai pembelian maksimal produk ${product.name}.`
         return res.status(400).json(response)
     }
 
     try {
-        const created = await tCart.create({
+        const cart = {
             merchant_id: app.merchant_id ,
             user_id: app.user_id ,
+            product_id: body.product_id,
             qty: +body.qty,
-            subtotal: product.price,
-            total: (product.price * 0.1) + product.price,
+            subtotal: +product.price * +body.qty,
+            tax: (+product.price * 0.1) * +body.qty,
+            total: ((+product.price * 0.1) + +product.price) * +body.qty,
             status: 'waiting',
+            notes: body?.notes
+        }
+
+        let result
+        const existCart = await tCart.findOne({
+            where: {
+                merchant_id: { [Op.eq]: app.merchant_id},
+                deleted: { [Op.eq]: 0 },
+                product_id: {[Op.eq]: body.product_id },
+                status: {[Op.eq]: 'waiting' }
+            }
         })
+        if (existCart) {
+            if (product.type == 'stock' && (+cart.qty < +product.stock)) {
+                const response = RESPONSE.error('unknown')
+                response.error_message = `Stok produk ${product.name} tidak tersedia.`
+                return res.status(400).json(response)
+            }
+            result = {
+                qty: +cart.qty + +existCart.qty,
+                subtotal: +cart.subtotal + +existCart.subtotal,
+                tax: +cart.tax + +existCart.tax,
+                total: +cart.total + +existCart.total,
+                notes: body.notes ? (existCart.notes ? existCart.notes + "|" + body?.notes : body.notes) : existCart.notes
+            }
+            await existCart.update(result)
+        } else {
+            result = await tCart.create(cart)
+        }
 
         const response = RESPONSE.default
-        response.data  = created
+        response.data  = result
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)

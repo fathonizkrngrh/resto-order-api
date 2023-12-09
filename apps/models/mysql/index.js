@@ -71,8 +71,9 @@ models.Sequelize = Sequelize
 models.categories.hasMany(models.products, { sourceKey: "id", foreignKey: "category_id", as: 'products' })
 models.products.belongsTo(models.categories, { sourceKey: "id", foreignKey: "category_id", as: 'category' })
 
-// models.carts.hasOne(models.products, { sourceKey: "id", foreignKey: "product_id", as: 'product' })
-// models.products.belongsTo(models.carts, { sourceKey: "id", foreignKey: "product_id", as: 'product' })
+models.carts.belongsTo(models.products, { sourceKey: "id", foreignKey: "product_id", as: 'product' })
+
+models.transactions.hasMany(models.transaction_details, { sourceKey: "trx_code", foreignKey: "trx_code", as: 'details' })
 
 module.exports = models
 //http://docs.sequelizejs.com/manual/installation/usage.html
