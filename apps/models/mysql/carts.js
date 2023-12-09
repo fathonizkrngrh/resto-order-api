@@ -32,6 +32,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     subtotal: {
       type: DataTypes.DECIMAL(10,2),
       allowNull: false

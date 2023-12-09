@@ -21,8 +21,7 @@ module.exports.list = async (req, res) => {
     const page              = req.query.page || 0
     const size              = req.query.size || 10
     const { limit, offset } = pagination.parse(page, size)
-    const app = req.app.locals
-    console.log(app)
+    const app               = req.app.locals
 
     let { order_by, order_type, with_products } = req.query
 

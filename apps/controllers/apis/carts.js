@@ -21,6 +21,7 @@ module.exports.list = async (req, res) => {
     const page              = req.query.page || 0
     const size              = req.query.size || 10
     const { limit, offset } = pagination.parse(page, size)
+    const app               = req.app.locals
 
     let { order_by, order_type } = req.query
 
@@ -30,8 +31,8 @@ module.exports.list = async (req, res) => {
             raw: true,
             where: {
                 deleted: { [Op.eq]: 0 },
-                merchant_id: { [Op.eq]: req.header("X-merchant-ID") },
-                user_id: { [Op.eq]: req.header("X-USER-ID") },
+                merchant_id: { [Op.eq]: app.merchant_id },
+                user_id: { [Op.eq]: app.user_id },
                 status: { [Op.eq]: 'waiting' },
             },
             include: [{
@@ -64,7 +65,8 @@ module.exports.list = async (req, res) => {
  * @returns 
  */
 module.exports.add_to_cart = async (req, res) => {
-    const body = req.body
+    const body  = req.body
+    const app   = req.app.locals
 
     if (!body.product_id || !body.qty || !body.notes) {
         const response = RESPONSE.error('unknown')
@@ -73,7 +75,7 @@ module.exports.add_to_cart = async (req, res) => {
     }
 
     const product = await tProduct.findOne({raw: true, where: {
-        merchant_id: { [Op.eq]: req.header('x-merchant-id')},
+        merchant_id: { [Op.eq]: app.merchant_id},
         deleted: { [Op.eq]: 0 },
         product_id: {[Op.eq]: body.product_id }}
     })
@@ -95,8 +97,8 @@ module.exports.add_to_cart = async (req, res) => {
 
     try {
         const created = await tCart.create({
-            merchant_id: req.header('x-merchant-id') ,
-            user_id: req.header('x-user-id') ,
+            merchant_id: app.merchant_id ,
+            user_id: app.user_id ,
             qty: +body.qty,
             subtotal: product.price,
             total: (product.price * 0.1) + product.price,

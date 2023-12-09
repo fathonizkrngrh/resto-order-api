@@ -34,7 +34,7 @@ module.exports.signin = async (req, res) => {
         })
         if (!user) {
             const response = RESPONSE.error('unknown')
-            response.error_message = 'Pengguna tidak terdaftar..'
+            response.error_message = 'Pengguna tidak terdaftar.'
             return res.status(400).json(response)
         }
 
@@ -52,7 +52,7 @@ module.exports.signin = async (req, res) => {
             user_id: user.id,
             merchant_id: user.merchant_id,
             token: token
-        };
+        }
         res.status(200).send(response);
     } catch (error) {
         console.log(error)
@@ -64,7 +64,7 @@ module.exports.signin = async (req, res) => {
 
 module.exports.signup = async (req, res) => {
     let {
-        username, email, password, password_confirmation
+        username, email, password, password_confirmation, phone
     } = req.body
 
     try {
@@ -98,23 +98,25 @@ module.exports.signup = async (req, res) => {
             return res.status(400).json(response)
         }
         
-        const checkPhone = await tUser.findOne({
-            raw: true,
-            where: {
-                merchant_id: { [Op.eq]: req.header('X-MERCHANT-ID') },
-                phone: { [Op.eq]: UTILITIES.parsePhoneNumber(phone) },
-                deleted: { [Op.eq]: 0 }
+        if (phone) {
+            const checkPhone = await tUser.findOne({
+                raw: true,
+                where: {
+                    merchant_id: { [Op.eq]: req.header('X-MERCHANT-ID') },
+                    phone: { [Op.eq]: UTILITIES.parsePhoneNumber(phone) },
+                    deleted: { [Op.eq]: 0 }
+                }
+            })
+            if (checkPhone && checkPhone.email.toLowerCase() === email.toLowerCase()) {
+                const response = RESPONSE.error('unknown')
+                response.error_message = `No. HP sudah terdaftar. Silahkan gunakan No. HP yang lain.`
+                return res.status(400).json(response)
             }
-        })
-        if (checkPhone && checkPhone.email.toLowerCase() === email.toLowerCase()) {
-            const response = RESPONSE.error('unknown')
-            response.error_message = `No. HP sudah terdaftar. Silahkan gunakan No. HP yang lain.`
-            return res.status(400).json(response)
         }
 
         const passwordHash = require('crypto').createHash('sha1').update(`${password.trim()}${CONFIG.password_key_encrypt}`).digest('hex')
         
-        const newUser = await tUser.create({ username, phone: UTILITIES.parsePhoneNumber(phone), email, password: passwordHash, merchant_id: req.header('X-MERCHANT-ID') })
+        const newUser = await tUser.create({ username, phone: UTILITIES.parsePhoneNumber(phone) || null, email, password: passwordHash, merchant_id: req.header('X-MERCHANT-ID') })
         const response = RESPONSE.default
         response.data = newUser
         return res.status(200).json(response)
@@ -123,7 +125,7 @@ module.exports.signup = async (req, res) => {
         console.log(error)
         // Prepare and send an error response
         const response = RESPONSE.error('unknown')
-        response.error_message = 'Tidak dapat menyimpan data. Silahkan laporakan kendala ini.'
+        response.error_message =  error.message || 'Tidak dapat menyimpan data. Silahkan laporakan kendala ini.'
         return res.status(500).json(response)
     }
 }

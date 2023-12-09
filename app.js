@@ -64,7 +64,6 @@ app.use(function (req, res, next) {
   next();
 });
 
-
 // MODELS
 app.models = {};
 app.models.mysql = require("./apps/models/mysql");
