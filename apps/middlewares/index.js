@@ -50,7 +50,7 @@ module.exports.authentication = async (req, res, next) => {
             return res.status(401).json(response)
         }
 
-        req.app.locals = { user_id: decoded.user_id, merchant_id: decoded.merchant_id }
+        req.app.locals = { user_id: decoded.user_id, merchant_id: decoded.merchant_id, current_points: user.current_points, total_points: user.total_points }, 
         next()
     } catch (err) {
         if (err.name === "JsonWebTokenError") {

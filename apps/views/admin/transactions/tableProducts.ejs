@@ -1,0 +1,99 @@
+<div id="show-product" class="tab-pane fade show active" role="tabpanel">
+  <!-- Table -->
+  <div class="card shadow mb-4">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table
+          class="table table-bordered table-sm"
+          id="dataTable"
+          width="100%"
+          cellspacing="0"
+        >
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Stock</th>
+              <th>Point</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(let i = 0; i < product.length; i++){ %>
+            <tr>
+              <td><%- product[i].code %></td>
+              <td><%- product[i].name %></td>
+              <td>Rp. <%- product[i].price %></td>
+              <td><%- product[i].category_name %></td>
+              <% if(product[i].type === 'stock'){ %>
+                  <%  if(product[i].stock === 0){ %>
+                    <td>
+                      <b class="text-danger">Out of Stock </b>
+                    </td>
+                    <td>
+                      <b class="text-danger">--</b>
+                    </td>
+                  <% } else { %>
+                    <td>
+                      <b class="text-success">Ready</b>
+                    </td>
+                    <td>
+                      <b class="text-success"><%- product[i].stock %></b>
+                    </td>
+                  <% } %>
+              <% } else if(product[i].type === 'cook'){ %>
+                  <%  if(product[i].ready === 0){ %>
+                    <td>
+                      <b class="text-danger">Out of Stock </b>
+                    </td>
+                    <td>
+                      <b class="text">--</b>
+                    </td>
+                  <% } else { %>
+                    <td>
+                      <b class="text-success">Ready</b>
+                    </td>
+                    <td>
+                      <b class="text">--</b>
+                    </td>
+                  <% } %>
+              <% } %>
+              <td><%- product[i].point %></td>
+
+              <td>
+                <form
+                  action="/admin/product/<%- product[i].id%>?_method=DELETE"
+                  method="POST"
+                >
+                  <a
+                    href="/admin/product/show-image/<%- product[i].id%>"
+                    class="btn btn-info btn-circle btn-sm"
+                    ><i class="fas fa-image"></i
+                  ></a>
+                  <a
+                    href="/admin/product/<%- product[i].id%>"
+                    class="btn btn-warning btn-circle btn-sm button-update"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <button
+                    class="btn btn-danger btn-circle btn-sm"
+                    type="submit"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+
+            <% }%>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- AkhirTable -->
+</div>

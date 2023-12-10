@@ -1,0 +1,148 @@
+<div id="edit-product" class="tab-pane fade show active" role="tabpanel">
+  <div class="card-header py-3">
+    <h4>Edit Product</h4>
+  </div>
+    <div class="card shadow mb-4 mt-t active">
+      <div class="card-body">
+        <form action="/admin/product/edit/" method="POST" enctype="multipart/form-data">
+          <div class="row g-3">
+            <div class="form-group col-md-6">
+              <label for="name">Category</label>
+              <select class="form-select" name="category_id">
+                <% for (let i = 0; i< category.length; i++) { %>
+                  <% if (category[i].id === product.category_id) { %>
+                    <option value="<%= category[i].id %>" selected>
+                      <%= category[i].name %>
+                    </option>
+                  <% } else { %>
+                    <option value="<%= category[i].id %>">
+                      <%= category[i].name %>
+                    </option>
+                  <% } %>
+                <% } %>
+              </select>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                placeholder="Enter name"
+                name="name"
+                value="<%= product.name %>"
+              />
+              <input
+                type="hidden"
+                class="form-control"
+                id="id"
+                name="id"
+                value="<%= product.id %>"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="Price">Price</label>
+              <input
+                type="number"
+                class="form-control"
+                id="price"
+                placeholder="Enter price"
+                name="price"
+                value="<%= product.price %>"
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="image">Image</label>
+              <input
+                type="file"
+                class="form-control"
+                id="image"
+                name="image"
+                single
+              />
+            </div>
+            <div class="form-group col-md-6">
+              <label for="name">Type</label>
+              <select class="form-select" name="type" id="typeSelectEdit">
+                <% if (product.type === 'stock') { %>
+                  <option selected value="stock">Stock</option>
+                  <option value="cook">Cook</option>
+                <% } else { %>
+                  <option value="stock">Stock</option>
+                  <option selected value="cook">Cook</option>
+                <% } %>
+              </select>
+            </div>
+            <div class="form-group col-md-6" id="stockInputEdit" style="display: none;">
+              <label for="Stock">Stock</label>
+              <input
+                type="number"
+                class="form-control"
+                id="stock"
+                placeholder="Enter stock"
+                name="stock"
+                value="<%= product.stock %>"
+              />
+            </div>
+            <div class="form-group col-md-6" id="cookInputsEdit" style="display: none;">
+              <label for="isReady">Ready</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="ready"
+                  id="isReadyTrue"
+                  value=1
+                />
+                <label class="form-check-label" for="isReadyTrue">
+                  Yes
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="isReady"
+                  id="isReadyFalse"
+                  value=0
+                />
+                <label class="form-check-label" for="isReadyFalse">
+                  No
+                </label>
+              </div>
+            </div>
+            
+          </div>
+  
+          <button type="submit" class="btn btn-primary">Save Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const typeSelectEdit = document.getElementById('typeSelectEdit');
+    const stockInputEdit = document.getElementById('stockInputEdit');
+    const cookInputsEdit = document.getElementById('cookInputsEdit');
+  
+    typeSelectEdit.addEventListener('change', function () {
+      if (this.value === 'stock') {
+        stockInputEdit.style.display = 'block';
+        cookInputsEdit.style.display = 'none';
+      } else if (this.value === 'cook') {
+        cookInputsEdit.style.display = 'block';
+        stockInputEdit.style.display = 'none';
+      } else {
+        stockInputEdit.style.display = 'none';
+        cookInputsEdit.style.display = 'none';
+      }
+    });
+
+    if (typeSelectEdit.value === 'stock') {
+        stockInputEdit.style.display = 'block';
+        cookInputsEdit.style.display = 'none';
+      } else if (typeSelectEdit.value === 'cook') {
+        cookInputsEdit.style.display = 'block';
+        stockInputEdit.style.display = 'none';
+      }
+  </script>

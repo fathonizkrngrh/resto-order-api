@@ -73,7 +73,10 @@ models.products.belongsTo(models.categories, { sourceKey: "id", foreignKey: "cat
 
 models.carts.belongsTo(models.products, { sourceKey: "id", foreignKey: "product_id", as: 'product' })
 
+models.transaction_details.belongsTo(models.products, { foreignKey: "product_id", as: 'product' })
 models.transactions.hasMany(models.transaction_details, { sourceKey: "trx_code", foreignKey: "trx_code", as: 'details' })
+
+models.transactions.belongsTo(models.users, { foreignKey: "user_id", as: 'user' })
 
 module.exports = models
 //http://docs.sequelizejs.com/manual/installation/usage.html

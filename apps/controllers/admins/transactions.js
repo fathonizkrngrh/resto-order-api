@@ -37,6 +37,8 @@ module.exports.list = async (req, res) => {
                 include: [{
                     model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
                 }]
+            }, {
+                model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
             }],
             ...req.query.pagination == 'true' && {
                 offset      : offset,
