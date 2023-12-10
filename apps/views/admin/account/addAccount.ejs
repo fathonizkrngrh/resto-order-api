@@ -23,8 +23,10 @@
             <label for="role">Role</label>
             <select class="form-select" name="role">
               <option selected value="">--- Role ---</option>
-              <option value="superadmin">Superadmin</option>
-              <option value="admin">Admin</option>
+              <% if (user.role == 'superadmin') { %>
+                <option value="superadmin">Superadmin</option>
+                <option value="admin">Admin</option>
+              <% } %>
               <option value="staff">Staff</option>
             </select>
           </div>

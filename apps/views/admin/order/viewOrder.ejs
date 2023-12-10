@@ -19,41 +19,12 @@
       <div class="container-fluid">
         <%- include('../../partials/message.ejs') %>
         <!-- Page Heading -->
-        <h1 class="h3 mb-4 text-gray-800">Orderer</h1>
+        <h1 class="h3 mb-4 text-gray-800">Order</h1>
         <!-- Akhir Heading -->
-        <% if(action == 'view'){%>
-        <!-- nav tabs -->
-        <ul class="nav nav-tabs">
-          <li class="nav-item active">
-            <a
-              class="nav-link active"
-              data-toggle="tab"
-              id="show-order-tab"
-              href="#show-order"
-              role="tab"
-              >Show order</a
-            >
-          </li>
-        </ul>
-        <div class="tab-content"><%- include('tableOrder.ejs') %></div>
 
-        <% } else if(action == 'show product') { %>
-
-        <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a
-              class="nav-link active"
-              data-toggle="tab"
-              id="show-product-tab"
-              href="#show-product"
-              role="tab"
-              >Show Product</a
-            >
-          </li>
-        </ul>
-        <div class="tab-content"></div>
-
-        <% } %>
+        <!-- Table -->
+        <%- include('listOrder.ejs') %>
+        <!-- AkhirTable -->
       </div>
       <!-- /.container-fluid -->
     </div>
@@ -107,74 +78,169 @@
     </div>
   </div>
 </div>
-<%- include('../../partials/js.ejs')%>
 
-<!-- socket -->
-<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+<%- include('modalApproveOrder.ejs'); %>
+<%- include('modalDetailOrder.ejs'); %>
+<%- include('../../partials/js.ejs'); %>
 
-<!-- Socket.io Script -->
 <script>
-  const socket = io();
+  const viewDetailButtons = document.querySelectorAll('.button-detail');
 
-  socket.on('newOrder', (order) => {
-    // Handle the new order
-    console.log('New order received:', order);
+  // Ketika salah satu tombol ditekan
+  viewDetailButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Ambil data order dari atribut data pada tombol
+      const order = JSON.parse(button.getAttribute('data-order'));
+      const merchant = JSON.parse(button.getAttribute('data-merchant'));
+      if (order.status == 'waiting') {
+        console.log('details', order.details);
 
-    // Update the table
-    updateTable(order);
+        $("#orderApproveModal").modal("show");
 
-    // Show alert
-    showAlert('success', 'New order received');
-  });
-
-  function updateTable(order) {
-
-    // Example: Append a new row to the table
-    const newRow = `
-    <tr>
-      <td>${order._id+ 1}</td>
-      <td>${order.invoice}</td>
-      <td>Rp. ${order.total}</td>
-      <td>${order.tableNumber}</td>
-      <td>
-        <table class="table mb-0 p-0">
-          ${order.cartId.map(cartItem => `
+        // Buat string HTML untuk tabel detail pesanan
+        let modalBody = `
+        <table class="table align-middle table-nowrap table-centered mb-0">
+          <thead>
             <tr>
-              <td style="width: 30px">${cartItem.qty}x</td>
-              <td>${cartItem.productId.name}</td>
-              <td style="width: 150px">${cartItem.notes}</td>
+              <th>No.</th>
+              <th>Item</th>
+              <th>Notes</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th class="text-end">Total</th>
             </tr>
-          `).join('')}
-        </table>
-      </td>
-      <td>${order.username}</td>
-      <td>
-        ${order.isPaid
-          ? '<b class="text-success">Paid</b>'
-          : '<b class="text-danger">Unpaid</b>'}
-      </td>
-      <td>
-        <form action="/admin/order/${order._id}?_method=PUT" method="POST">
-          <a href="javascript:void()" type="button" class="btn btn-warning btn-circle btn-sm button-detail"
-            data-id="${order._id}" data-name="${order.invoice}">
-            <i class="fas fa-edit"></i>
-          </a>
-          ${!order.isPaid
-            ? '<button class="btn btn-circle btn-sm btn-success" type="submit"><i class="fas fa-check"></i></button>'
-            : ''}
-        </form>
-      </td>
-    </tr>`;
+          </thead>
+          <tbody>`;
 
-    document.getElementById('dataTable').innerHTML += newRow;
-  }
+        // Isi tabel dengan detail pesanan
+        order.details.forEach((detail, index) => {
+          modalBody += `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${detail.product.name}</td>
+              <td>${detail.notes || "-"}</td>
+              <td>${detail.product.price  }</td>
+              <td>${detail.qty}</td>
+              <td class="text-right">${detail.subtotal}</td>
+            </tr>`;
+        });
 
-  function showAlert(status, message) {
-    const alertDiv = document.getElementById('alertDiv');
-    alertDiv.innerHTML = `
-      <div class="alert alert-${status}" role="alert">
-        ${message}
-      </div>
-    `;
+        // approve
+        document.getElementById('approve-merchant-name').innerText = merchant.name;
+        document.getElementById('approve-username').innerText = order.user.username;
+        document.getElementById('approve-phone').innerText = order.user.phone;
+        document.getElementById('approve-cashier').innerText = order.served_by;
+        document.getElementById('approve-trx-code').innerText = order.trx_code;
+        document.getElementById('approve-date').innerText = order.created_on;
+        document.getElementById('approve-table').innerText = order.table_number;
+        document.getElementById('approve-trx').innerHTML = `
+        <span class="badge bg-warning font-size-12 ms-2" id="approve-status"></span>`;
+        document.getElementById('approve-status').innerText = order.status;
+        
+        modalBody += `
+        <tr>
+            <th scope="row" colspan="5" class="text-end">Sub Total</th>
+            <td class="text-end">Rp. ${order.subtotal}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="5" class="border-0 text-end">
+                Taxes</th>
+            <td class="border-0 text-end">Rp. ${order.tax}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="5" class="border-0 text-end">Total</th>
+            <td class="border-0 text-end"><h6 class="m-0 fw-semibold">Rp. ${order.total}</h6></td>
+        </tr>
+        `
+
+        modalBody += `
+        </tbody>
+        </table>`;
+        
+        $("#approve-orderInfo").html(modalBody);
+
+      } if (order.status == 'unpaid') {
+        $("#orderModal").modal("show");
+
+          // Buat string HTML untuk tabel detail pesanan
+        let modalBody = `
+          <table class="table align-middle table-nowrap table-centered mb-0">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Item</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th class="text-end">Total</th>
+              </tr>
+            </thead>
+            <tbody>`;
+
+        // Isi tabel dengan detail pesanan
+        order.details.forEach((detail, index) => {
+          modalBody += `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${detail.product.name}</td>
+              <td>Rp. ${detail.product.price  }</td>
+              <td>${detail.qty}</td>
+              <td class="text-right">Rp. ${detail.subtotal}</td>
+            </tr>`;
+        });
+
+        // detail
+        document.getElementById('detail-merchant-name').innerText = merchant.name;
+        document.getElementById('detail-username').innerText = order.user.username;
+        document.getElementById('detail-phone').innerText = order.user.phone;
+        document.getElementById('detail-cashier').innerText = order.served_by || '';
+        document.getElementById('detail-trx-code').innerText = order.trx_code;
+        document.getElementById('detail-date').innerText = order.created_on;
+        document.getElementById('detail-table').innerText = order.table_number;
+        document.getElementById('detail-trx').innerHTML = `
+        <span class="badge bg-primary font-size-12 ms-2" id="detail-status"></span>`;
+        document.getElementById('detail-status').innerText = order.status;
+
+        modalBody += `
+        <tr>
+            <th scope="row" colspan="4" class="text-end">Sub Total</th>
+            <td class="text-end">Rp. ${order.subtotal}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="4" class="border-0 text-end">
+                Taxes</th>
+            <td class="border-0 text-end">Rp. ${order.tax}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="4" class="border-0 text-end">Total</th>
+            <td class="border-0 text-end"><h6 class="m-0 fw-semibold">Rp. ${order.total}</h6></td>
+        </tr>
+        `
+
+        // Tutup tag tabel
+        modalBody += `
+            </tbody>
+          </table>`;
+
+        $("#orderInfo").html(modalBody);
+      }
+
+      }
+    )})
+
+  function printReceipt() {
+    // Mengatur CSS untuk menyembunyikan elemen-elemen yang tidak ingin dicetak
+    const elementsToHide = document.querySelectorAll('body > *:not(#receipt)');
+    elementsToHide.forEach((element) => {
+      element.style.display = 'none';
+    });
+
+    // Memanggil window.print()
+    window.print();
+
+    // Setelah pencetakan selesai, kembalikan tampilan asli dengan menampilkan kembali elemen yang disembunyikan
+    elementsToHide.forEach((element) => {
+      element.style.display = '';
+    });
   }
+    
 </script>

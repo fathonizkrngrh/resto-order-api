@@ -15,6 +15,7 @@ const cRank = require("../controllers/apis/user_ranks");
 // ADMIN CONTROLLERS
 const cDashboard = require("../controllers/admins/dashboard");
 const cAdminCategory = require("../controllers/admins/categories");
+const cAdminOrder = require("../controllers/admins/orders");
 const cAdminProduct = require("../controllers/admins/products");
 const cAdminMerchant = require("../controllers/admins/merchants");
 const cAdminAccount = require("../controllers/admins/accounts");
@@ -39,6 +40,9 @@ module.exports = (app) => {
   adminRouter.post("/category", (req, res) => cAdminCategory.addCategory(req, res));
   adminRouter.put("/category", (req, res) => cAdminCategory.editCategory(req, res));
   adminRouter.delete("/category/:id", (req, res) => cAdminCategory.deleteCategory(req, res));
+  // category
+  adminRouter.get("/order", (req, res) => cAdminOrder.viewOrder(req, res));
+  adminRouter.post("/order", (req, res) => cAdminOrder.addCategory(req, res));
   // product
   adminRouter.get("/product", (req, res) => cAdminProduct.viewProduct(req, res));
   adminRouter.get("/product/show-image/:id", (req, res) => cAdminProduct.showImageProduct(req, res));

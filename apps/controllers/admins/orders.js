@@ -14,6 +14,149 @@ const tTransactionDetail = model.transaction_details
 const catchMessage = `Mohon maaf telah terjadi gangguan, jangan panik kami akan terus meningkatkan layanan.`
 
 
+module.exports = {
+    viewOrder: async (req, res) => {
+        const alertMessage = req.flash("alertMessage");
+        const alertStatus = req.flash("alertStatus");
+        const alert = {
+            message: alertMessage,
+            status: alertStatus,
+        };
+    
+        const { user, merchant } = req.app.locals;
+
+        const exclude = ['modified_on', 'deleted']
+
+        try {
+            const waiting_orders = await tTransaction.findAll({
+                attributes: { exclude: exclude },
+                where: {
+                    deleted: { [Op.eq]: 0 },
+                    merchant_id: { [Op.eq]: user.merchant_id },
+                    status: { [Op.eq]: 'waiting' },
+                },
+                include: [{
+                    model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                    include: [{
+                        model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                    }]
+                }, {
+                    model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
+                }],
+                order: [['created_on','DESC']]
+            })
+
+            const ordered = await tTransaction.findAll({
+                attributes: { exclude: exclude },
+                where: {
+                    deleted: { [Op.eq]: 0 },
+                    merchant_id: { [Op.eq]: user.merchant_id },
+                    status: { [Op.eq]: 'unpaid' },
+                },
+                include: [{
+                    model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                    include: [{
+                        model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                    }]
+                }, {
+                    model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
+                }],
+                order: [['created_on','DESC']]
+            })
+
+            const done = await tTransaction.findAll({
+                attributes: { exclude: exclude },
+                where: {
+                    deleted: { [Op.eq]: 0 },
+                    merchant_id: { [Op.eq]: user.merchant_id },
+                    status: { [Op.in]: ['paid', 'canceled'] },
+                },
+                include: [{
+                    model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                    include: [{
+                        model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                    }]
+                }, {
+                    model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
+                }],
+                order: [['created_on','DESC']]
+            })
+
+            const orders = {
+                waiting: waiting_orders,
+                ordered: ordered,
+                done: done,
+            }
+
+            const totalKeys = Object.keys(orders);
+            for(const key of totalKeys){ 
+                console.log(key)
+                console.log(orders[key])
+            }
+
+            // return res.json(orders)
+            const title = "RestoOrder | Order";
+            return res.render("admin/order/viewOrder", {
+                ...req.app.locals,
+                total_orders: orders,
+                merchant,
+                alert,
+                title,
+            });
+      } catch (err) {
+        console.log(err)
+        return res.redirect("/admin/order");
+      }
+    },
+    editCategory: async (req, res) => {
+      const { user } = req.app.locals;
+      const body = req.body;
+  
+      try {
+        await tCategory.update({
+          ...req.body 
+        }, {
+          where: {
+            merchant_id: { [Op.eq]: user.merchant_id },
+            id: { [Op.eq]: body.id }, 
+            deleted: { [Op.eq]: 0 } 
+          }
+        });
+  
+        req.flash("alertMessage", "success edit category");
+        req.flash("alertStatus", "success");
+        return res.redirect("/admin/category");
+      } catch (err) {
+        console.log(err);
+        req.flash("alertMessage", `${err.message}`);
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/category");
+      }
+    },
+    deleteCategory: async (req, res) => {
+      const { user } = req.app.locals;
+      const { id } = req.params;
+      try {
+        await tCategory.update({ deleted: 1}, { 
+          where: {
+              merchant_id: { [Op.eq]: user.merchant_id },
+              id: { [Op.eq]: id }, 
+              deleted: { [Op.eq]: 0 } 
+          }
+        })
+  
+        req.flash("alertMessage", "success delete category");
+        req.flash("alertStatus", "success");
+        res.redirect("/admin/category");
+      } catch (err) {
+        console.log(err);
+        req.flash("alertMessage", `${err.message}`);
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/category");
+      }
+    },
+};
+  
 module.exports.list = async (req, res) => {
     const page              = req.query.page || 0
     const size              = req.query.size || 10

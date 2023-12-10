@@ -119,7 +119,7 @@ module.exports.checkSuperAdmin = async (req, res, next) => {
     const { user, merchant } = req.app.locals;
     console.log("user dari middleware super admin", user)
 
-    if(user.role !== 'superadmin'){
+    if(user.role !== 'superadmin' && user.role !== 'admin'){
         req.flash("alertMessage", "Anda tidak memiliki akses untuk halaman ini");
         req.flash("alertStatus", "danger");
         return res.redirect("/admin");

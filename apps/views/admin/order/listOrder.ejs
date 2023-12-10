@@ -1,0 +1,59 @@
+<!-- LIST Order -->
+<div class="card shadow mb-4">
+  
+  <% const totalKeys = Object.keys(total_orders); %>
+  <% for(let i = 0; i < totalKeys.length; i++){ %>
+    <%  const key = totalKeys[i] %>
+    <%  const orders = total_orders[key] %>
+    <div class="card-header py-3">
+      <div class="text-xl font-weight-bold text-black text-uppercase mb-1"> 
+        <%= key %>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row" >
+        <% for(let i = 0; i < orders?.length; i++){ %>
+          <%  const order = orders[i] %>
+          <div class="col-xl-2 col-md-4 mb-4" id="dataOrder">
+              <a
+                href="javascript:void()"
+                style="text-decoration: none;"
+                class="button-detail cursor-pointer"
+                data-order="<%= JSON.stringify(order) %>"
+                data-merchant="<%= JSON.stringify(merchant) %>"
+              >
+              <div class="card shadow h-100 py-2
+                <% if (order.status === 'waiting') { %>
+                  border-left-warning
+                <% } else if (order.status === 'unpaid') { %>
+                  border-left-primary
+                <% } else if (order.status === 'paid') { %>
+                  border-left-success
+                <% } %>
+              ">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col text-center">
+                      <div class="text-xl font-weight-bold text-black text-uppercase mb-1"> 
+                        <%= order.trx_code %>
+                      </div>
+                      <div class="text-xl font-weight-regular text-black text-uppercase mb-1"> 
+                        <%= order.user.username %>
+                      </div>
+                      <hr style="border-top: 2px solid #3e3e3e; margin-top: 0;">
+                      <div class="h1 mb-0 font-weight-bold text-gray-800">
+                        <%- order.table_number %>
+                      </div>
+                      <p class="text-gray-800">Status: <%= order.status %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+<!-- Akhir order -->

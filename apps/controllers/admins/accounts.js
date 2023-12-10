@@ -20,6 +20,15 @@ module.exports = {
     const { user, merchant } = req.app.locals;
 
     const whereClause = (user) => ({
+      ...user.role == 'staff' || user.role == 'admin' && { 
+        merchant_id: { [Op.eq]: user.merchant_id }
+      }, 
+      deleted: { [Op.eq]: 0 }
+    })
+    const whereClauseMerchant = (user) => ({
+      ...user.role == 'staff' || user.role == 'admin' && { 
+        package_name: { [Op.eq]: user.merchant_id }
+      }, 
       deleted: { [Op.eq]: 0 }
     })
 
@@ -30,7 +39,7 @@ module.exports = {
       })
       const merchants = await tMerchant.findAll({
         raw: true, attributes: { exclude: ['created_on', 'modified_on', 'deleted'] },
-        order: [['id', 'DESC' ]], where: whereClause(user),
+        order: [['id', 'DESC' ]], where: whereClauseMerchant(user),
       })
 
       console.log(accounts)

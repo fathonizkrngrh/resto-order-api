@@ -26,24 +26,24 @@
     >
   </li>
 
+  <!-- Divider -->
+  <hr class="sidebar-divider" />
+  <!-- Heading -->
+  <div class="sidebar-heading">Merchants</div>
   <% if (user.role === 'superadmin') { %>
-    <!-- Divider -->
-    <hr class="sidebar-divider" />
-    <!-- Heading -->
-    <div class="sidebar-heading">Merchants</div>
-      <li class="nav-item">
-        <a class="nav-link" href="/admin/merchant">
-          <i class="fas fa-fw fa-list-alt"></i>
-          <span>Merchant</span></a
-        >
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/admin/account">
-          <i class="fas fa-fw fa-list-alt"></i>
-          <span>Account</span></a
-        >
-      </li>
+  <li class="nav-item">
+    <a class="nav-link" href="/admin/merchant">
+      <i class="fas fa-fw fa-list-alt"></i>
+      <span>Merchant</span></a
+      >
+  </li>
   <% } %>
+  <li class="nav-item">
+    <a class="nav-link" href="/admin/account">
+      <i class="fas fa-fw fa-list-alt"></i>
+      <span>Account</span></a
+    >
+  </li>
   <!-- Divider -->
   <hr class="sidebar-divider" />
   <!-- Heading -->
@@ -65,17 +65,26 @@
     >
   </li>
 
+  
   <!-- Heading -->
   <div class="sidebar-heading">Order</div>
-
   <!-- Nav Item - Tables -->
   <li class="nav-item">
     <a class="nav-link" href="/admin/order">
       <i class="fas fa-fw fa-shopping-cart"></i>
       <span>Order</span></a
-    >
-  </li>
-
+      >
+    </li>
+    
+    <!-- <% if (user.role === 'staff') { %> -->
+  <!-- <% } %> -->
+    <li class="nav-item">
+      <a class="nav-link" href="/admin/transaction">
+        <i class="fas fa-fw fa-shopping-cart"></i>
+        <span>History</span></a
+        >
+    </li>
+      
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block" />
 

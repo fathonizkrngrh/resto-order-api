@@ -82,7 +82,7 @@ module.exports.checkout = async (req, res) => {
             attributes: { exclude: exclude }
         }]
     })
-    if (!carts) {
+    if (!carts.length > 0) {
         const response = RESPONSE.error('unknown')
         response.error_message = `Keranjang masih kosong.`
         return res.status(400).json(response)
@@ -94,6 +94,7 @@ module.exports.checkout = async (req, res) => {
     let transaction = {
         tax: 0,
         total: 0,
+        subtotal: 0,
         point: 0,
     }
     let transaction_details = [], updatedCarts = []
@@ -124,6 +125,7 @@ module.exports.checkout = async (req, res) => {
         // transaction attributes
         transaction.tax += +cart.tax
         transaction.total += +cart.total
+        transaction.subtotal += +cart.subtotal
         transaction.point += +product.point * +cart.qty
 
         updatedCarts.push(
