@@ -166,6 +166,7 @@ module.exports.add_to_cart = async (req, res) => {
         const existCart = await tCart.findOne({
             where: {
                 merchant_id: { [Op.eq]: app.merchant_id},
+                user_id: { [Op.eq]: app.user_id},
                 deleted: { [Op.eq]: 0 },
                 product_id: {[Op.eq]: body.product_id },
                 status: {[Op.eq]: 'waiting' }

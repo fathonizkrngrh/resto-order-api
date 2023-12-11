@@ -146,7 +146,7 @@ module.exports.google_callback = async (req, res) => {
         const ticket = google.verifyIdToken({ idToken: credential, audience: CONFIG.google_client_id })
         .catch((error) => {
             const response = RESPONSE.error('unknown')
-            response.error_message = `Kredensial tidak valid.`
+            response.error_message = `Kredensial tidak valid.` + error.message 
             return res.status(400).json(response)
         });
 
