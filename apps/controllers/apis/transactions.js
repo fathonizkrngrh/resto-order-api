@@ -267,10 +267,7 @@ module.exports.check_status = async (req, res) => {
                 id: { [Op.eq]: body.id },
             },
             include: [{
-                model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: exclude},
-                include: [{
-                    model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
-                }]
+                model: tUser, required: true, as: 'user', attributes: ['username' ]
             }],
         })
 
