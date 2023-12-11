@@ -28,7 +28,7 @@ module.exports.rank = async (req, res) => {
 
     try {
         const list = await tUser.findAndCountAll({
-            attributes: { exclude: ['created_on', 'modified_on', 'deleted'] },
+            attributes: { exclude: ['created_on', 'modified_on', 'deleted', 'password'] },
             where: whereClause(req.query),
             ...req.query.pagination == 'true' && {
                 offset      : offset,

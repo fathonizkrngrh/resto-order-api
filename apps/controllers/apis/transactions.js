@@ -35,7 +35,7 @@ module.exports.list = async (req, res) => {
             include: [{
                 model: tTransactionDetail, required: false, as: 'details', attributes: { exclude: exclude },
                 include: [{
-                    model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                    model: tProduct, required: false, as: 'product', attributes:  ['name', 'image', 'price', 'point']
                 }]
             }],
             ...req.query.pagination == 'true' && {
