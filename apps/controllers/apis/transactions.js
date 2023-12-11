@@ -33,7 +33,7 @@ module.exports.list = async (req, res) => {
                 user_id: { [Op.eq]: app.user_id },
             },
             include: [{
-                model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                model: tTransactionDetail, required: false, as: 'details', attributes: { exclude: exclude },
                 include: [{
                     model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
                 }]
@@ -260,7 +260,7 @@ module.exports.check_status = async (req, res) => {
     try {
         const trx = await tTransaction.findOne({
             attributes: { exclude: exclude },
-            raw: true, where: {
+            where: {
                 deleted: { [Op.eq]: 0 },
                 merchant_id: { [Op.eq]: app.merchant_id },
                 user_id: { [Op.eq]: app.user_id },
@@ -269,7 +269,7 @@ module.exports.check_status = async (req, res) => {
             include: [{
                 model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: exclude},
                 include: [{
-                    model: tProduct, required: true, as: 'product', attributes: { exclude: exclude },
+                    model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
                 }]
             }],
         })

@@ -168,6 +168,7 @@ module.exports.add_to_cart = async (req, res) => {
                 notes: body.notes ? (existCart.notes ? existCart.notes + "|" + body?.notes : body.notes) : existCart.notes
             }
             await existCart.update(result)
+            result.id = existCart.id
         } else {
             result = await tCart.create(cart)
         }
