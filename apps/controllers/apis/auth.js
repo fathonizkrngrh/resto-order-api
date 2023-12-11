@@ -10,14 +10,14 @@ const { google } = require('../../config/oauth');
 const tUser = model.users
 
 module.exports.signin = async (req, res) => {
-    const { email, phone, password } = req.body
+    const { phonemail, password } = req.body
 
     if (!req.header('x-merchant-id')) {
         const response = RESPONSE.error('unknown')
         response.error_message = 'Permintaan tidak lengkap. Masukkan identitas merchant'
         return res.status(400).json(response)
     }
-    if ((!email || !password) && (!phone || !password)) {
+    if (!phonemail || !password) {
         const response = RESPONSE.error('unknown')
         response.error_message = 'Permintaan tidak lengkap. Masukkan Email atau No. Handphone dan Password'
         return res.status(400).json(response)
@@ -29,8 +29,11 @@ module.exports.signin = async (req, res) => {
             where: { 
                 merchant_id: { [Op.eq]: req.header('X-MERCHANT-ID')}, 
                 deleted: { [Op.eq]: 0 }, 
-                ...email && { email: { [Op.eq]: email}},
-                ...phone && { phone: { [Op.eq]: UTILITIES.parsePhoneNumber(phone)}}},     
+                [Op.or]: {
+                    email: { [Op.like]: phonemail},
+                    phone: { [Op.like]: UTILITIES.parsePhoneNumber(phonemail)}
+                }
+            },     
         })
         if (!user) {
             const response = RESPONSE.error('unknown')
@@ -41,7 +44,7 @@ module.exports.signin = async (req, res) => {
         const hashed = require('crypto').createHash('sha1').update(`${password.trim()}${CONFIG.password_key_encrypt}`).digest('hex')
         if (hashed !== user.password) {
             const response = RESPONSE.error('unknown')
-            response.error_message = 'Kombinasi email dan password tidak dikenal.'
+            response.error_message = 'Password salah.'
             return res.status(400).json(response)
         }
 
