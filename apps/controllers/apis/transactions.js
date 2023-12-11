@@ -147,13 +147,13 @@ module.exports.checkout = async (req, res) => {
     try {
         await Promise.all([
             tTransactionDetail.bulkCreate(transaction_details, { transaction: dbTrx}),
-            tTransaction.create(transaction, { transaction: dbTrx}),
             updatedCarts
         ])
+        const trx = await tTransaction.create(transaction, { transaction: dbTrx})
 
         await dbTrx.commit()
         const response = RESPONSE.default
-        response.data  = { ...transaction, transaction_details}
+        response.data  = { transaction: trx, transaction_details}
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)
