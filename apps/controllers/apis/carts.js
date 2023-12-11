@@ -26,8 +26,8 @@ module.exports.list = async (req, res) => {
     let { order_by, order_type } = req.query
 
     try {
-        const list = await tCart.findAndCountAll({
-            attributes: { exclude: ['modified_on', 'deleted'] },
+        const list = await tCart.findAll({
+            raw: true, attributes: { exclude: ['modified_on', 'deleted'] },
             where: {
                 deleted: { [Op.eq]: 0 },
                 merchant_id: { [Op.eq]: app.merchant_id },
@@ -35,7 +35,7 @@ module.exports.list = async (req, res) => {
                 status: { [Op.eq]: 'waiting' },
             },
             include: [{
-                model: tProduct, required: true, as: 'product', attributes: {exclude: ['created_on', 'modified_on', 'deleted']}
+                model: tProduct, required: true, as: 'product', attributes: ['name', 'image', 'price', 'point']
             }],
             ...req.query.pagination == 'true' && {
                 offset      : offset,
@@ -44,9 +44,26 @@ module.exports.list = async (req, res) => {
             order: [[order_by || 'created_on', order_type || 'DESC']]
         })
 
+        const cart = {
+            qty: 0,
+            subtotal: 0,
+            tax: 0,
+            total: 0,
+            points: 0
+        }
+        await list.forEach(data => {
+            console.log(data)
+            cart.qty += +data.qty
+            cart.subtotal += +data.subtotal
+            cart.tax += +data.tax
+            cart.total += +data.total
+            cart.points += +data["product.point"] * +data.qty
+            data.point = +data["product.point"] * +data.qty
+        });
+
         const response = RESPONSE.default
         response.request_param = req.query
-        response.data  = pagination.data(list, page, size)
+        response.data  = { ...cart, details: list}
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)
