@@ -168,7 +168,7 @@ module.exports.google_callback = async (req, res) => {
                 username: payload.name, phone: null,
                 email: payload.email, password: password, 
                 merchant_id: req.header('X-MERCHANT-ID') 
-            })
+            }, )
         
             const token = generateToken(newUser)
 

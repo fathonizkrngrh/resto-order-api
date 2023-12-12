@@ -225,6 +225,8 @@ module.exports = {
       }
 
       if (body.type === "cook") body.stock = 0 
+
+      console.log(req.body)
         
       await tProduct.update({...body}, { where: { merchant_id: { [Op.eq]: user.merchant_id }, id: { [Op.eq]: body.id }, deleted: { [Op.eq]: 0 } }});
 
