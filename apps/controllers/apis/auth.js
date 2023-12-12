@@ -143,14 +143,14 @@ module.exports.google_callback = async (req, res) => {
             return res.status(400).json(response)
         }
 
-        const ticket = google.verifyIdToken({ idToken: credential, audience: CONFIG.google_client_id })
+        const ticket = await google.verifyIdToken({ idToken: credential, audience: CONFIG.google_client_id })
         .catch((error) => {
             const response = RESPONSE.error('unknown')
-            response.error_message = `Kredensial tidak valid.` + error.message 
+            response.error_message = `Kredensial tidak valid. ` + error.message 
             return res.status(400).json(response)
         });
 
-        const payload = ticket.getPayload();
+        const payload = await ticket.getPayload()
 
         const user = await tUser.findOne({
             raw: true, where: {
@@ -161,7 +161,8 @@ module.exports.google_callback = async (req, res) => {
         })
 
         if (!user) {
-            const password = await generateOAuthPassword(payload.email);
+            console.log('belum ada akun')
+            const password = await UTILITIES.generateOAuthPassword(payload.email);
 
             const newUser = await tUser.create({ 
                 username: payload.name, phone: null,
@@ -179,6 +180,8 @@ module.exports.google_callback = async (req, res) => {
             };
             res.status(200).send(response);
         }
+
+        console.log('udah ada akun')
 
         const token = generateToken(user)
 

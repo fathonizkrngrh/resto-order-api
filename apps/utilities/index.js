@@ -1,6 +1,7 @@
 "use state"
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
+const CONFIG = require('../config')
 
 module.exports.generateRandomNumber = (length) => {
     let result = '';
