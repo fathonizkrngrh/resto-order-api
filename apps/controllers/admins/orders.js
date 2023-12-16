@@ -4,9 +4,11 @@ const pagination = require("../../utilities/pagination");
 const RESPONSE = require("../../utilities/response");
 const UTILITIES = require("../../utilities");
 const CONFIG = require('../../config')
-const model = require("../../models/mysql")
+const model = require("../../models/mysql");
+const moment = require('moment');
 const seq = model.sequelize
 const tUser = model.users
+const tAccount = model.accounts
 const tCart = model.carts
 const tProduct = model.products
 const tTransaction = model.transactions
@@ -78,6 +80,8 @@ module.exports = {
                     }]
                 }, {
                     model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
+                }, {
+                    model: tAccount, required: true, as: 'account', attributes: { exclude: exclude },
                 }],
                 order: [['created_on','DESC']]
             })
@@ -108,52 +112,166 @@ module.exports = {
         return res.redirect("/admin/order");
       }
     },
-    editCategory: async (req, res) => {
-      const { user } = req.app.locals;
-      const body = req.body;
-  
-      try {
-        await tCategory.update({
-          ...req.body 
-        }, {
-          where: {
-            merchant_id: { [Op.eq]: user.merchant_id },
-            id: { [Op.eq]: body.id }, 
-            deleted: { [Op.eq]: 0 } 
-          }
-        });
-  
-        req.flash("alertMessage", "success edit category");
-        req.flash("alertStatus", "success");
-        return res.redirect("/admin/category");
-      } catch (err) {
-        console.log(err);
-        req.flash("alertMessage", `${err.message}`);
-        req.flash("alertStatus", "danger");
-        res.redirect("/admin/category");
-      }
-    },
-    deleteCategory: async (req, res) => {
-      const { user } = req.app.locals;
-      const { id } = req.params;
-      try {
-        await tCategory.update({ deleted: 1}, { 
-          where: {
-              merchant_id: { [Op.eq]: user.merchant_id },
-              id: { [Op.eq]: id }, 
-              deleted: { [Op.eq]: 0 } 
-          }
+    approveOrder: async (req, res) => {
+        const { user }    = req.app.locals;
+        const body        = req.body;
+        const dbTrx       = await seq.transaction()
+
+        console.log(body)
+    
+        const exclude = ['created_on', 'modified_on', 'deleted']
+    
+        const trxs = await tTransaction.findOne({
+            where: {
+                merchant_id: { [Op.eq]: user.merchant_id},
+                deleted: { [Op.eq]: 0 },
+                id: { [Op.eq]: body.transaction_id },
+            },
+            include: [{
+                model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                include: [{
+                    model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                }]
+            }],
         })
-  
-        req.flash("alertMessage", "success delete category");
-        req.flash("alertStatus", "success");
-        res.redirect("/admin/category");
-      } catch (err) {
-        console.log(err);
-        req.flash("alertMessage", `${err.message}`);
+      if (!trxs) {
+        req.flash("alertMessage", `Transaksi tidak ditemukan`);
         req.flash("alertStatus", "danger");
-        res.redirect("/admin/category");
+        res.redirect("/admin/order");
       }
+
+      if (body.status === 'reject' ) {
+        await trxs.update({ status: 'canceled' }, { transaction: dbTrx})
+        
+        await dbTrx.commit()
+        req.flash("alertMessage", `Success ${body.status} transaction ${trxs.trx_code}`);
+        req.flash("alertStatus", "success");
+        return res.redirect("/admin/order"); 
+      }
+  
+      let updatedProducts = []
+      trxs.details.forEach( async (trx) => {
+          const product = trx.product
+          // update product
+          updatedProducts.push(
+              await tProduct.update({
+                  ...product.type == 'stock' && { stock: +product.stock - +trx.qty },
+                  total_order: +product.total_order + trx.qty
+              },{
+                  where: {
+                      merchant_id: { [Op.eq]: user.merchant_id },
+                      id: { [Op.eq]: product.id },
+                      deleted: { [Op.eq]: 0 },
+                  }
+              }, { transaction: dbTrx })
+          )
+      });
+  
+        try {
+            // if (body?.with_points == 'true') {
+                
+            // } else {
+            //     await tUser.update({
+            //         total_points: +user.total_points + +transaction.point,
+            //         current_points: +app.current_points + +transaction.point,
+            //     }, { 
+            //         where: {
+            //             merchant_id: { [Op.eq]: app.merchant_id },
+            //             id: { [Op.eq]: app.user_id },
+            //             deleted: { [Op.eq]: 0 },
+            //         }
+            //     })
+            // }
+    
+            await Promise.all([ 
+                updatedProducts,
+                trxs.update({ status: 'unpaid' }, { transaction: dbTrx})
+            ])
+
+            req.flash("alertMessage", `Success ${body.status} transaction ${trxs.trx_code}`);
+            req.flash("alertStatus", "success");
+            return res.redirect("/admin/order"); 
+        } catch (err) {
+            console.log(err);
+            await dbTrx.rollback()
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+            res.redirect("/admin/order");
+        }
+    },
+    paid: async (req, res) => {
+        const { user }    = req.app.locals;
+        const body        = req.body;
+        const dbTrx       = await seq.transaction()
+
+        console.log("======== payload =========")
+        console.log(body)
+    
+        const exclude = ['created_on', 'modified_on', 'deleted']
+    
+        const trxs = await tTransaction.findOne({
+            where: {
+                merchant_id: { [Op.eq]: user.merchant_id},
+                deleted: { [Op.eq]: 0 },
+                id: { [Op.eq]: body.transaction_id },
+            },
+            include: [{
+                model: tTransactionDetail, required: true, as: 'details', attributes: { exclude: exclude },
+                include: [{
+                    model: tProduct, required: false, as: 'product', attributes: { exclude: exclude },
+                }]
+            },{
+                model: tUser, required: true, as: 'user', attributes: { exclude: exclude },
+            }, ],
+        })
+        if (!trxs) {
+            req.flash("alertMessage", `Transaksi tidak ditemukan`);
+            req.flash("alertStatus", "danger");
+            res.redirect("/admin/order");
+        }
+  
+        try {
+            if (body.payment_method === 'point') {
+                await tUser.update({
+                    current_points: trxs.user.current_points - +trxs.total,
+                }, { where: {
+                        merchant_id: { [Op.eq]: user.merchant_id },
+                        id: { [Op.eq]: trxs.user_id },
+                        deleted: { [Op.eq]: 0 },
+                    }
+                }, {transaction: dbTrx})
+            } else {
+                const total_point = trxs.user.total_points + +trxs.point
+                const current_point = trxs.user.current_points + +trxs.point
+                console.log("========= points ==========")
+                console.log(current_point, total_point)
+                await tUser.update({
+                    total_points: total_point,
+                    current_points: current_point,
+                }, { where: {
+                        merchant_id: { [Op.eq]: user.merchant_id },
+                        id: { [Op.eq]: trxs.user_id },
+                        deleted: { [Op.eq]: 0 },
+                    }
+                }, { transaction: dbTrx})
+            }
+    
+            await trxs.update({ 
+                status: 'paid', payment_type: body.payment_method,
+                served_by: user.id, served_at: moment(), 
+            }, { transaction: dbTrx})
+
+            await dbTrx.commit()
+            req.flash("alertMessage", `Payment success for transaction ${trxs.trx_code}`);
+            req.flash("alertStatus", "success");
+            return res.redirect("/admin/order"); 
+        } catch (err) {
+            console.log(err);
+            await dbTrx.rollback()
+            req.flash("alertMessage", `${err.message}`);
+            req.flash("alertStatus", "danger");
+            res.redirect("/admin/order");
+        }
     },
 };
   
@@ -380,51 +498,6 @@ module.exports.approve = async (req, res) => {
 
         const response = RESPONSE.default
         response.data  = { status: "success"}
-        return res.status(200).json(response)   
-    } catch (err) {
-        console.log(err)
-        const response = RESPONSE.error('unknown')
-        response.error_message = err.message || catchMessage
-        return res.status(500).json(response)
-    }
-}
-
-module.exports.check_status = async (req, res) => {
-    const app  = req.app.locals
-    const body = req.body
-
-    if (!body.id) {
-        const response = RESPONSE.error('unknown')
-        response.error_message = `Permintaan tidak lengkap. Masukka ID dari transaksi`
-        return res.status(400).json(response)
-    }
-    const exclude = ['modified_on', 'deleted']
-
-    try {
-        const trx = await tTransaction.findOne({
-            attributes: { exclude: exclude },
-            raw: true, where: {
-                deleted: { [Op.eq]: 0 },
-                merchant_id: { [Op.eq]: app.merchant_id },
-                user_id: { [Op.eq]: app.user_id },
-                id: { [Op.eq]: body.id },
-            },
-            include: [{
-                model: tTransactionDetail, required: true, as: 'details', attributes: {exclude: exclude},
-                include: [{
-                    model: tProduct, required: true, as: 'product', attributes: { exclude: exclude },
-                }]
-            }],
-        })
-
-        if (!trx) {
-            const response = RESPONSE.error('unknown')
-            response.error_message = `Transaksi tidak ditemukan.`
-            return res.status(400).json(response)
-        }
-
-        const response = RESPONSE.default
-        response.data  = trx
         return res.status(200).json(response)   
     } catch (err) {
         console.log(err)

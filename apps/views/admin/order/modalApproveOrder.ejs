@@ -61,20 +61,42 @@
               
             </div>
             <div class="d-print-none mt-4">
-              <div class="float-end">
-                </form>
-                  <a onclick="printReceipt()" class="btn btn-success me-1"><i class="fa fa-print"></i></a>
-              </div>
               <div class="mr-2 float-end">
-                <form action="/admin/order" method="POST">
+                <form action="/admin/order/approve" method="POST">
+                  <input
+                    type="text"
+                    class="form-control transaction-id"
+                    name="transaction_id"
+                    hidden
+                  />
                   <input
                     type="text"
                     class="form-control"
-                    id="approve-order-id"
-                    name="approve-order-id"
+                    id="approve"
+                    name="status"
+                    value="reject"
                     hidden
                   />
-                  <button type="submit" class="btn btn-primary">Approve Order</button>
+                  <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
+              </div>
+              <div class="mr-2 float-end">
+                <form action="/admin/order/approve" method="POST">
+                   <input
+                    type="text"
+                    class="form-control transaction-id"
+                    name="transaction_id"
+                    hidden
+                  />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="approve"
+                    name="status"
+                    value="approve"
+                    hidden
+                  />
+                  <button type="submit" class="btn btn-primary">Approve</button>
                 </form>
               </div>
               

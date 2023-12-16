@@ -29,6 +29,8 @@
                   border-left-primary
                 <% } else if (order.status === 'paid') { %>
                   border-left-success
+                <% } else if (order.status === 'canceled') { %>
+                  border-left-danger
                 <% } %>
               ">
                 <div class="card-body">
@@ -44,7 +46,7 @@
                       <div class="h1 mb-0 font-weight-bold text-gray-800">
                         <%- order.table_number %>
                       </div>
-                      <p class="text-gray-800">Status: <%= order.status %></p>
+                      <p class="text-gray-800 text-uppercase mt-2"><%= order.status %></p>
                     </div>
                   </div>
                 </div>

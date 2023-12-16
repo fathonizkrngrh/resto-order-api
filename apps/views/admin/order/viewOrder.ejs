@@ -80,20 +80,96 @@
 </div>
 
 <%- include('modalApproveOrder.ejs'); %>
+<%- include('modalPaidOrder.ejs'); %>
 <%- include('modalDetailOrder.ejs'); %>
 <%- include('../../partials/js.ejs'); %>
 
 <script>
+  
   const viewDetailButtons = document.querySelectorAll('.button-detail');
 
-  // Ketika salah satu tombol ditekan
   viewDetailButtons.forEach(button => {
+    const order = JSON.parse(button.getAttribute('data-order'));
+    const merchant = JSON.parse(button.getAttribute('data-merchant'));
+    
     button.addEventListener('click', () => {
-      // Ambil data order dari atribut data pada tombol
-      const order = JSON.parse(button.getAttribute('data-order'));
-      const merchant = JSON.parse(button.getAttribute('data-merchant'));
+      // const modal = document.getElementById('orderApproveModal')
+      // console.log("modal", modal)
+      const transactions = document.querySelectorAll('.transaction-id');
+      Array.from(transactions).forEach((transaction) => {
+        transaction.value = order.id;
+      });
+
+      if (order.status == 'paid') {
+        console.log("order", order)
+
+        $("#orderPaidModal").modal("show");
+
+        // Buat string HTML untuk tabel detail pesanan
+        let modalBody = `
+        <table class="table align-middle table-nowrap table-centered mb-0">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Item</th>
+              <th>Notes</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        // Isi tabel dengan detail pesanan
+        order.details.forEach((detail, index) => {
+          modalBody += `
+            <tr>
+              <td>${index + 1}</td>
+              <td>${detail.product.name}</td>
+              <td>${detail.notes || "-"}</td>
+              <td>${detail.product.price  }</td>
+              <td>${detail.qty}</td>
+              <td class="text-right">${detail.subtotal}</td>
+            </tr>`;
+        });
+
+        // approve
+        document.getElementById('paid-merchant-name').innerText = merchant.name;
+        document.getElementById('paid-username').innerText = order.user.username;
+        document.getElementById('paid-phone').innerText = order.user.phone;
+        document.getElementById('paid-cashier').innerText = order.account.name;
+        document.getElementById('paid-trx-code').innerText = order.trx_code;
+        document.getElementById('paid-date').innerText = order.created_on;
+        document.getElementById('paid-table').innerText = order.table_number;
+        document.getElementById('paid-trx').innerHTML = `
+        <span class="badge bg-warning font-size-12 ms-2" id="paid-status"></span>`;
+        document.getElementById('paid-status').innerText = order.status;
+        
+        modalBody += `
+        <tr>
+            <th scope="row" colspan="5" class="text-end">Sub Total</th>
+            <td class="text-end">Rp. ${order.subtotal}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="5" class="border-0 text-end">
+                Taxes</th>
+            <td class="border-0 text-end">Rp. ${order.tax}</td>
+        </tr>
+        <tr>
+            <th scope="row" colspan="5" class="border-0 text-end">Total</th>
+            <td class="border-0 text-end"><h6 class="m-0 fw-semibold">Rp. ${order.total}</h6></td>
+        </tr>
+        `
+
+        modalBody += `
+        </tbody>
+        </table>`;
+        
+        $("#paid-orderInfo").html(modalBody);
+
+      }
+      
       if (order.status == 'waiting') {
-        console.log('details', order.details);
 
         $("#orderApproveModal").modal("show");
 
@@ -159,7 +235,9 @@
         
         $("#approve-orderInfo").html(modalBody);
 
-      } if (order.status == 'unpaid') {
+      }
+      
+      if (order.status == 'unpaid') {
         $("#orderModal").modal("show");
 
           // Buat string HTML untuk tabel detail pesanan

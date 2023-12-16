@@ -71,11 +71,11 @@
           </div>
           <!-- Formulir pembayaran (sisi kanan) -->
           <div class="col-md-6">
-            <form action="/admin/order" method="POST">
+            <form action="/admin/order/paid" method="POST">
               <div class="modal-body">
                 <div class="mb-3">
                   <label for="name">Payment Method</label>
-                  <select class="form-select" name="method" id="typeSelect">
+                  <select class="form-select" name="payment_method" id="typeSelect">
                     <option selected disabled>--- Type ---</option>
                     <option value="cash">Cash</option>
                     <option value="qris">QRIS</option>
@@ -83,6 +83,12 @@
                     <option value="point">Point</option>
                   </select>
                 </div>
+                <input
+                    type="text"
+                    class="form-control transaction-id"
+                    name="transaction_id"
+                    hidden
+                  />
               </div>
               <div class="modal-footer">
                 <button

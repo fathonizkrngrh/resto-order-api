@@ -42,7 +42,8 @@ module.exports = (app) => {
   adminRouter.delete("/category/:id", (req, res) => cAdminCategory.deleteCategory(req, res));
   // category
   adminRouter.get("/order", (req, res) => cAdminOrder.viewOrder(req, res));
-  adminRouter.post("/order", (req, res) => cAdminOrder.addCategory(req, res));
+  adminRouter.post("/order/approve", (req, res) => cAdminOrder.approveOrder(req, res));
+  adminRouter.post("/order/paid", (req, res) => cAdminOrder.paid(req, res));
   // product
   adminRouter.get("/product", (req, res) => cAdminProduct.viewProduct(req, res));
   adminRouter.get("/product/show-image/:id", (req, res) => cAdminProduct.showImageProduct(req, res));
