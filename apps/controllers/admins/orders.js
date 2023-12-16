@@ -188,6 +188,7 @@ module.exports = {
                 trxs.update({ status: 'unpaid' }, { transaction: dbTrx})
             ])
 
+            await dbTrx.commit()
             req.flash("alertMessage", `Success ${body.status} transaction ${trxs.trx_code}`);
             req.flash("alertStatus", "success");
             return res.redirect("/admin/order"); 
